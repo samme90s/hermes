@@ -29,12 +29,13 @@ def main():
     # Note: The first run will download the ~1.5GB Whisper model.
     # You can use smaller models by changing "openai/whisper-small" to:
     # "openai/whisper-tiny" (smallest)
+    # "openai/whisper-small"
     # "openai/whisper-base"
     # "openai/whisper-medium"
     # "openai/whisper-large-v3" (best quality)
     speech_recognizer = pipeline(
         task="automatic-speech-recognition",
-        model="openai/whisper-small"
+        model="openai/whisper-tiny"
     )
     transcription = transcribe(
         "./assets/bat.wav",
