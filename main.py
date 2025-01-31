@@ -65,7 +65,8 @@ plt.close()
 # n_mels stands for the number of MEL bands to generate.
 # The mel bands define a set of frequency ranges that divide the spectrum into
 # perceptually meaningful components, using a set of filters whose shape and
-# spacing are chosen to mimic the way the human ear responds to different frequencies.
+# spacing are chosen to mimic the way the human ear responds to different
+# frequencies.
 # Common values for n_mels are 40 or 80.
 #
 # fmax indicates the highest frequency (in Hz) we care about.

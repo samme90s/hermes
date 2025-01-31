@@ -17,7 +17,6 @@ id2label = minds.features["intent_class"].int2str
 # print(id2label(example["intent_class"]))
 
 
-
 def generate_audio(ix: int):
     example = minds.shuffle()[0]
     audio = example["audio"]
