@@ -4,6 +4,7 @@ from transformers import pipeline
 
 # Load speech recognition pipeline
 #
+# https://huggingface.co/openai
 # Note: The first run will download the ~1.5GB Whisper model.
 # You can use smaller models by changing "openai/whisper-small" to:
 # "openai/whisper-tiny" (smallest)
