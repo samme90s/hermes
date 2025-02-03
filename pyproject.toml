@@ -11,11 +11,10 @@ requires-python = ">=3.12"
 
 [tool.poetry.dependencies]
 python = ">=3.12"
-librosa = "^0.10.2.post1"
 transformers = "^4.48.2"
-torch = "^2.6.0"
-torchaudio = "^2.6.0"
 llvmlite = "^0.44.0"
+librosa = "^0.10.2.post1"
+torch = "^2.6.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
