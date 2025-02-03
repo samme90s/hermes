@@ -47,7 +47,13 @@ def transcribe_audio(audio_path: str, language: str = "en") -> str:
     # (in the form of a log-Mel spectrogram, for example).
     #
     # attention_mask:
-    # A mask showing the valid parts of the input.
+    # While not always provided by default, when it is available, the attention mask
+    # is a binary tensor (usually composed of ones and zeros).
+    # It tells the model which parts of the input are valid (usually ones) and which
+    # parts are padding (usually zeros). Padding is sometimes added to ensure that all
+    # input sequences have a uniform length.
+    # Without the mask, the model might treat padded (empty) sections as meaningful data,
+    # potentially leading to unexpected behavior.
     encoding = processor(audio_array, sampling_rate=sr, return_tensors="pt")
     input_features = encoding.input_features
 
