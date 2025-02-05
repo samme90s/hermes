@@ -1,16 +1,9 @@
-import { useState } from "react"
-import AudioButton from "./components/AudioButton"
 import AudioRecorder from "./components/AudioRecorder"
 
-function App() {
-    const [processing, setProcessing] = useState(false)
-
+export default function App() {
     return (
-        <div className="flex flex-col items-center justify-center h-screen">
-            <AudioButton processing={processing} setProcessing={setProcessing}></AudioButton>
-            <AudioRecorder></AudioRecorder>
+        <div className="flex items-center justify-center h-screen bg-neutral-900">
+            <AudioRecorder />
         </div>
     )
 }
-
-export default App

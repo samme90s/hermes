@@ -1,20 +1,39 @@
 import { useEffect, useState } from "react"
+import AudioButton from "./AudioButton"
+import AudioControls from "./AudioControls"
 
 export default function AudioRecorder() {
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
     const [recording, setRecording] = useState(false)
+    const [audioURL, setAudioURL] = useState<string | null>(null)
 
-    async function getMediaRecorder(): Promise<void> {
+    async function setupMediaRecorder(): Promise<void> {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                audio: true
-            })
-            const options = { mimeType: "audio/webm" }
-            const mediaRecorder = new MediaRecorder(stream, options)
+            if (!navigator?.mediaDevices) {
+                console.error("mediaDevices not supported")
+                return
+            }
 
-            const chunks: Blob[] = []
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" })
+            if (!MediaRecorder.isTypeSupported(mediaRecorder.mimeType)) {
+                console.error(`mimeType ${mediaRecorder.mimeType} is not supported`)
+                return
+            }
+
+            let audioChunks: Blob[] = []
             mediaRecorder.ondataavailable = (event) => {
-                chunks.push(event.data)
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data)
+                }
+            }
+            mediaRecorder.onstop = () => {
+                if (audioChunks.length > 0) {
+                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType })
+                    setAudioURL(URL.createObjectURL(audioBlob))
+                    // Reset chunks for the next recording session
+                    audioChunks = []
+                }
             }
 
             setMediaRecorder(mediaRecorder)
@@ -23,13 +42,35 @@ export default function AudioRecorder() {
         }
     }
 
+    function toggleRecording(): void {
+        if (!mediaRecorder) {
+            console.error("MediaRecorder not set")
+            return
+        }
+
+        if (recording) {
+            mediaRecorder.stop()
+            setRecording(false)
+            console.log("recording stopped")
+        } else {
+            mediaRecorder.start()
+            setRecording(true)
+            console.log("recording started")
+        }
+    }
+
     useEffect(() => {
-        getMediaRecorder()
+        setupMediaRecorder()
     }, [])
 
     useEffect(() => {
         console.log("recorder set")
     }, [mediaRecorder])
 
-    return <div>AudioRecorderPlaceholder</div>
+    return (
+        <div>
+            <AudioButton anim={recording} onClick={toggleRecording}></AudioButton>
+            {audioURL && <AudioControls src={audioURL} />}
+        </div>
+    )
 }
