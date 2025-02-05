@@ -4,7 +4,7 @@ import AudioControls from "./AudioControls"
 
 export default function AudioRecorder() {
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
-    const [recording, setRecording] = useState(false)
+    const [recording, setRecording] = useState<boolean>(false)
     const [audioURL, setAudioURL] = useState<string | null>(null)
 
     async function setupMediaRecorder(): Promise<void> {
@@ -48,14 +48,17 @@ export default function AudioRecorder() {
             return
         }
 
+        if (!recording) {
+            mediaRecorder.start()
+            setRecording(true)
+            console.log("recording started")
+            return
+        }
+
         if (recording) {
             mediaRecorder.stop()
             setRecording(false)
             console.log("recording stopped")
-        } else {
-            mediaRecorder.start()
-            setRecording(true)
-            console.log("recording started")
         }
     }
 
@@ -69,7 +72,7 @@ export default function AudioRecorder() {
 
     return (
         <div>
-            <AudioButton anim={recording} onClick={toggleRecording}></AudioButton>
+            <AudioButton anim={recording} size={128} onClick={toggleRecording}></AudioButton>
             {audioURL && <AudioControls src={audioURL} />}
         </div>
     )

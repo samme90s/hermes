@@ -3,44 +3,30 @@ import { cn } from "../lib/utils"
 
 interface AudioButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     anim: boolean
+    size: number
 }
 
-export default function AudioButton({ anim, ...props }: AudioButtonProps) {
+export default function AudioButton({ anim, size, ...props }: AudioButtonProps) {
+    // Ensures that the button can never be smaller than 16 pixels.
+    if (size < 16) {
+        size = 16
+    }
+
     return (
         <div className="flex items-center justify-center h-full">
             <button
                 {...props}
                 className={cn(
-                    anim && "animate-spin",
-                    anim && "shadow-red-500",
-                    "bg-black",
-                    "text-white",
+                    anim && "animate-pulse shadow-border-red",
+                    "bg-black text-white",
                     "hover:border-red-500",
-                    "font-bold",
                     "p-4",
-                    "rounded-full",
-                    "border-2",
-                    "border-transparent",
-                    "transition-border",
-                    "duration-200",
-                    "flex",
-                    "items-center",
-                    "justify-center",
-                    "group" // add this to make children aware of the parent's hover state
+                    "border-2 border-transparent transition-border duration-200 rounded-full",
+                    "flex items-center justify-center",
+                    "group"
                 )}
-                // Custom
-                style={{
-                    boxShadow: anim ? "0 0 15px 5px rgba(255, 0, 0, 0.5)" : "0 0 10px rgba(0, 0, 0, 0.5)"
-                }}
             >
-                <AudioWaveform
-                    className={cn(
-                        "group-hover:scale-90", // this applies scale-90 when parent is hovered
-                        "duration-200",
-                        "transition-transform"
-                    )}
-                    size={128}
-                />
+                <AudioWaveform className={"group-hover:scale-90 transition-transform duration-200"} size={size} />
             </button>
         </div>
     )
