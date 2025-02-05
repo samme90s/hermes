@@ -6,10 +6,7 @@ interface AudioButtonProps {
     setProcessing: (processing: boolean) => void
 }
 
-export default function AudioButton({
-    processing,
-    setProcessing
-}: AudioButtonProps) {
+export default function AudioButton({ processing, setProcessing }: AudioButtonProps) {
     return (
         <div>
             <button
@@ -28,10 +25,7 @@ export default function AudioButton({
                 )}
                 onClick={() => setProcessing(!processing)}
             >
-                <AudioWaveform
-                    className="hover:scale-90 duration-200 transition-transform"
-                    size={64}
-                />
+                <AudioWaveform className={cn("hover:scale-90", "duration-200", "transition-transform")} size={64} />
             </button>
         </div>
     )
