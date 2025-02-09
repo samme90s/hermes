@@ -1,8 +1,13 @@
 {
     "name": "client",
-    "private": true,
     "version": "0.0.0",
+    "author": {
+        "name": "Samuel Svensson",
+        "email": "samme.s90@gmail.com"
+    },
+    "main": "/src/main.tsx",
     "type": "module",
+    "private": true,
     "scripts": {
         "dev": "vite",
         "build": "tsc -b && vite build",
