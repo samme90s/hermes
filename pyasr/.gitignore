@@ -4,3 +4,9 @@
 
 # Files
 **/*.env
+**/*.log
+**/*.pyc
+**/*pb2_grpc.py
+**/*pb2.py
+**/*pb2.pyi
+

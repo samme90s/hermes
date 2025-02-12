@@ -2,7 +2,7 @@
 
 Python automatic speech recognition
 
-## Development
+## Unix/MacOS
 
 ### Poetry
 
@@ -25,20 +25,15 @@ Install the following in order to use poetry:
 poetry config virtualenvs.in-project true
 ```
 
-### Unix/MacOS/Windows
-
-#### Dependencies
+### Usage
 
 ```shell
-# Install project dependencies
-poetry install
-```
-
-#### Usage
-
-```shell
-# Activate environment and run program
-source $(poetry env info --path)/bin/activate && python3 main.py
-# Or use the following command that should work on all platforms
-poetry run python main.py
+# Installs project dependencies
+poetry install &&
+# Activates the virtual environment
+source $(poetry env info --path)/bin/activate &&
+# Run the setup script
+source ./setup_sh &&
+# Run the main script
+python3 main.py
 ```

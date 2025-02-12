@@ -1,10 +1,9 @@
 # https://huggingface.co/openai/whisper-small
 # https://huggingface.co/docs/transformers/en/model_doc/whisper
+import io
 
 # librosa:
 # A library for audio processing (loading/resampling audio files).
-import io
-
 import librosa
 # torch:
 # Provides PyTorch utilities for deep learning (e.g., tensor creation).
@@ -25,23 +24,28 @@ processor = WhisperProcessor.from_pretrained("openai/whisper-small")
 model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-small")
 
 
-def transcribe_audio_bytes(audio_bytes: bytes, language: str = "en") -> str:
+def transcribe_audio_base64(audio_base64: bytes, language: str = "en") -> str:
     """
-    Transcribes an audio file at the given path using the Whisper model.
+    Transcribes an audio file provided using the Whisper model.
 
-    Parameters:
-    - audio_bytes (bytes): The raw audio file as a bytes object.
-      (base64 encoded audio string).
-    - language (str): Language code to force transcription into
-      (e.g., "en" for English).
+    `audio_base64` here is a Base64-encoded audio content-that is,
+    an ASCII representation of binary audio data
+    (typically produced by encoding the raw bytes of your audio file).
 
-    Returns:
-    - str: The transcribed text.
+    For testing purposes, you can let https://base64.guru or similar tools
+    encode your audio files.
     """
+    if not isinstance(audio_base64, bytes):
+        raise ValueError("audio_base64 must be a bytes object as Base64")
+    if not isinstance(language, str):
+        raise ValueError("language must be a string")
+    if len(language) != 2:
+        raise ValueError("language must be a two-letter language code")
+
     # Wrap the bytes in a BytesIO object for librosa to read,
     # since we are passing a base64-encoded audio string.
     # This replaces commonly used file paths.
-    audio_buffer = io.BytesIO(audio_bytes)
+    audio_buffer = io.BytesIO(audio_base64)
 
     # Load the audio file and resample to 16 kHz as required by Whisper.
     # librosa.load returns a tuple (audio_array, sample_rate).
@@ -106,4 +110,7 @@ def transcribe_audio_bytes(audio_bytes: bytes, language: str = "en") -> str:
     # processor.decode converts the first generated sequence of token IDs to a
     # string
     transcription = processor.decode(predicted_ids[0])
-    return transcription
+    if not isinstance(transcription, str):
+        raise ValueError("transcription must be a string")
+
+    return transcription.strip()
