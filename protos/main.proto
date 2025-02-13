@@ -5,9 +5,9 @@ syntax = "proto3";
 // For example, if your organization owns "example.com", you might use "com.example"
 // using a reverse domain name ensures that your package name is globally unique,
 // which helps avoid naming collisions when integrating with other systems.
-package grpc.pyasr;
+package grpc.main;
 
-service Proto {
+service Main {
   rpc transcribe_audio (transcription_request) returns (transcription_reply) {}
 }
 
