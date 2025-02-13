@@ -1,9 +1,0 @@
-#!/bin/bash
-
-# This command generates the Python code from the proto file and
-# is placed under the `protos/out` directory.
-#
-# The `-I./protos` flag is used to specify the directory where the
-# proto files are located. This tells the protoc compiler where to
-# look for the files.
-python3 -m grpc_tools.protoc -I=../protos --pyi_out=. --python_out=. --grpc_python_out=. ../protos/main.proto

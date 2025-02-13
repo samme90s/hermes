@@ -1,5 +1,6 @@
 # https://huggingface.co/openai/whisper-small
 # https://huggingface.co/docs/transformers/en/model_doc/whisper
+import base64
 import io
 
 # librosa:
@@ -24,6 +25,11 @@ processor = WhisperProcessor.from_pretrained("openai/whisper-small")
 model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-small")
 
 
+class Base64Exception(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
+
 def transcribe_audio_base64(audio_base64: bytes, language: str = "en") -> str:
     """
     Transcribes an audio file provided using the Whisper model.
@@ -42,10 +48,16 @@ def transcribe_audio_base64(audio_base64: bytes, language: str = "en") -> str:
     if len(language) != 2:
         raise ValueError("language must be a two-letter language code")
 
+    try:    
+        # Decode the Base64-encoded audio data
+        audio_data = base64.b64decode(audio_base64)
+    except Exception as _:
+        raise Base64Exception("Incorrect Base64 passed")        
+
     # Wrap the bytes in a BytesIO object for librosa to read,
     # since we are passing a base64-encoded audio string.
     # This replaces commonly used file paths.
-    audio_buffer = io.BytesIO(audio_base64)
+    audio_buffer = io.BytesIO(audio_data)
 
     # Load the audio file and resample to 16 kHz as required by Whisper.
     # librosa.load returns a tuple (audio_array, sample_rate).

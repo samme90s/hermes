@@ -14,8 +14,6 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@grpc/grpc-js": "^1.12.6",
-        "@grpc/proto-loader": "^0.7.13",
         "lucide-react": "^0.474.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1"
