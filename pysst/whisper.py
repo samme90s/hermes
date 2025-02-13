@@ -30,34 +30,27 @@ class Base64Exception(Exception):
         super().__init__(*args)
 
 
-def transcribe_audio_base64(audio_base64: bytes, language: str = "en") -> str:
+def transcribe_audio_base64(audio_base64: str | bytes, language: str = "en") -> str:
     """
     Transcribes an audio file provided using the Whisper model.
 
     `audio_base64` here is a Base64-encoded audio content-that is,
-    an ASCII representation of binary audio data
+    an ASCII representation of an audio data
     (typically produced by encoding the raw bytes of your audio file).
-
-    For testing purposes, you can let https://base64.guru or similar tools
-    encode your audio files.
     """
-    if not isinstance(audio_base64, bytes):
-        raise ValueError("audio_base64 must be a bytes object as Base64")
-    if not isinstance(language, str):
-        raise ValueError("language must be a string")
     if len(language) != 2:
         raise ValueError("language must be a two-letter language code")
 
     try:    
         # Decode the Base64-encoded audio data
-        audio_data = base64.b64decode(audio_base64)
+        audio_bytes = base64.b64decode(audio_base64)
     except Exception as _:
         raise Base64Exception("Incorrect Base64 passed")        
 
     # Wrap the bytes in a BytesIO object for librosa to read,
     # since we are passing a base64-encoded audio string.
     # This replaces commonly used file paths.
-    audio_buffer = io.BytesIO(audio_data)
+    audio_buffer = io.BytesIO(audio_bytes)
 
     # Load the audio file and resample to 16 kHz as required by Whisper.
     # librosa.load returns a tuple (audio_array, sample_rate).
