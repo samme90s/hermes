@@ -16,6 +16,9 @@ export default function AudioRecorder() {
 
     async function requestAudioTranscription(audioBlob: Blob): Promise<AudioTranscriptionResponse> {
         const formData = new FormData()
+        // Adding the file.webm ensures that most/all web browsers
+        // can interpret the expected file extension.
+        // This is a known issue in FireFox.
         formData.append("file", audioBlob, "file.webm")
         const res = await fetch("http://localhost:8000/transcribe", {
             method: "POST",
