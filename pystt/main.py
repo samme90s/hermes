@@ -8,11 +8,6 @@ from whisper import transcribe
 
 # Get logger with instance name
 logger = get_logger()
-logger.debug("debug")
-logger.info("info")
-logger.warning("warn")
-logger.error("error")
-logger.critical("critical")
 
 
 def _process_error(exc) -> JSONResponse:
