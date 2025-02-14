@@ -8,10 +8,13 @@ import torch
 # Prepares raw audio input into the format expected by the model.
 # WhisperForConditionalGeneration: The Whisper model adapted for sequence (text) generation.
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
+from logger import get_logger
+
+logger = get_logger()
 
 # Load the Whisper processor and model (ensure you have the correct model checkpoint)
-processor = WhisperProcessor.from_pretrained("openai/whisper-tiny.en")  
-model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny.en")
+processor = WhisperProcessor.from_pretrained("openai/whisper-small")  
+model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-small")
 # This enables ALL neurons ensuring consistent predictions,
 # but potentially makes the model run slower!
 model.eval()  
@@ -23,28 +26,33 @@ def transcribe(audio_bytes: bytes, language: str = "en") -> str:
     if len(language) != 2:
         raise ValueError("language must be a two-letter language code")
 
-    # Use FFmpeg to decode WebM and resample to 16 kHz PCM WAV
+    # Use FFmpeg to decode and resample to 16 kHz
     process = subprocess.run(
         [
             "ffmpeg", "-i", "pipe:0",  
-            "-ar", "16000",           # Resample to 16 kHz
-            "-ac", "1",               # Convert to mono
-            "-f", "wav",              # Output format as WAV
-            "pipe:1"                  # Output to stdout (WAV bytes)
+            "-vn",                      # Ignore any video stream
+            "-ar", "16000",             # Resample to 16 kHz
+            "-ac", "1",                 # Convert to mono
+            "-f", "wav",                # Output format as WAV bytes
+            "pipe:1"                    # Output to stdout (WAV bytes)
         ],
-        input=audio_bytes,            # Provide WebM bytes as input
-        stdout=subprocess.PIPE,       # Capture output WAV bytes
-        stderr=subprocess.PIPE,       # Capture errors for debugging
-        check=True                    # Raise exception on failure
+        input=audio_bytes,              # Provide bytes as input
+        stdout=subprocess.PIPE,         # Capture output bytes
+        stderr=subprocess.PIPE,         # Capture errors for debugging
+        check=True                      # Raise exception on failure
     )
 
-    # Extract WAV bytes from FFmpeg output
-    wav_data = process.stdout 
-    # Convert WAV bytes into a NumPy array for Whisper processing
+    # Log FFmpeg errors for debugging purposes
+    # if process.stderr:
+    #     logger.debug("FFmpeg stderr: " + process.stderr.decode())
+
+    # Extract bytes from FFmpeg output
+    audio_data = process.stdout 
+    # Convert bytes into a NumPy array for Whisper processing
     # Define the maximum value for 16-bit signed integers
     int16_max = np.iinfo(np.int16).max  # This will give 32767
     # Normalize the audio data to the range [-1.0, 1.0]
-    audio_array = np.frombuffer(wav_data, dtype=np.int16).astype(np.float32) / int16_max
+    audio_array = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / int16_max
 
     # Preprocess audio using the processor (convert raw audio to input features)
     encoding = processor(audio_array, sampling_rate=16000, return_tensors="pt")

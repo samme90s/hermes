@@ -82,7 +82,9 @@ try:
 
     @app.post("/transcribe")
     async def post_transcribe(file: UploadFile = File(...)):
+        logger.debug(f"Recieved files: {file.filename}, Content-Type: {file.content_type}")
         audio_bytes = await file.read()
+        logger.debug(f"File size: {len(audio_bytes)} bytes")
         transcription = transcribe(
             audio_bytes=audio_bytes,
             language="en"
