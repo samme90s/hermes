@@ -1,5 +1,5 @@
 [project]
-name = "pysst"
+name = "pystt"
 version = "0.0.0"
 description = "Python speech to text"
 authors = [{ name = "Sam", email = "samme.s90@gmail.com" }]

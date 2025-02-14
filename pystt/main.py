@@ -10,24 +10,6 @@ from whisper import transcribe
 logger = get_logger()
 
 
-def _get_client_ip(request: Request) -> str:
-    # Check for the "X-Forwarded-For" header first.
-    client_ip = request.headers.get("X-Forwarded-For")
-    if client_ip:
-        # Use the first IP if multiple are provided.
-        client_ip = client_ip.split(",")[0].strip()
-    else:
-        # Check for an alternative custom header.
-        client_ip = request.headers.get("X-Envoy-External-Address")
-        if not client_ip:
-            # Safely retrieve the client IP only if request.client is not None.
-            if request.client is not None:
-                client_ip = request.client.host
-            else:
-                client_ip = "unknown"
-    return client_ip
-
-
 def _process_error(exc) -> JSONResponse:
     """
     Process the error and return the appropriate response
@@ -74,11 +56,7 @@ try:
         Middleware to log requests and responses using "HTTP" log level
         '''
         start_time = time.time()
-        # Retrieve the client IP address using the helper function.
-        client_ip = _get_client_ip(request)
     
-        logger.info("Start processing request", extra={"ip_address": client_ip})
-
         try:
             # Process the request
             response = await call_next(request)
@@ -90,10 +68,9 @@ try:
         formatted_process_time = f"{process_time:.2f}ms"
 
         # Log the request completion along with method, path, status, and processing time.
-        logger.info(
-            f"Completed {request.method} {request.url.path} in {formatted_process_time} with status {response.status_code}",
-            extra={"ip_address": client_ip}
-        )
+        logger.info(f"m: {request.method} {request.url.path}")
+        logger.info(f"s: {response.status_code}")
+        logger.info(f"t: {formatted_process_time}")
 
         return response
 

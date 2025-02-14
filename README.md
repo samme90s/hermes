@@ -12,5 +12,5 @@ efficient, low-latency speech-to-text processing.
 .
 |-assets (used for developement purposes mostly)
 |-client (frontend)
---pysst  (microservice)
+--pystt  (microservice)
 ```

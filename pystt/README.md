@@ -1,4 +1,4 @@
-# Pysst
+# Pystt
 
 Python speech to text
 
