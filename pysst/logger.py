@@ -19,6 +19,16 @@ except Exception as e:
     raise SystemExit(f"Failed to create log directory: {e}")
 
 
+# Custom logging filter to insert additional context into log records
+class ContextFilter(logging.Filter):
+    def filter(self, record):
+        # Add the sender's IP address to the log record if not provided.
+        if not hasattr(record, 'ip_address'):
+            record.ip_address = 'N/A'
+        # You may add further default fields here if needed.
+        return True
+
+
 def get_logger(name: str = "") -> logging.Logger:
     '''
     Function to create or get a logger with the specified name.
@@ -37,7 +47,14 @@ def get_logger(name: str = "") -> logging.Logger:
     # Create or get a logger with the specified name
     logger = logging.getLogger(name)
     logger.setLevel(level)  # Set logger level dynamically
-    formatter = logging.Formatter("(%(asctime)s) [(%(pathname)s) %(name)s] %(levelname)s: %(message)s")
+
+    # Add our custom context filter so that every record has an ip_address field (and others if added)
+    logger.addFilter(ContextFilter())
+
+    # Define an enhanced format that now includes ip_address and the function name
+    formatter = logging.Formatter(
+        "(%(asctime)s) [%(pathname)s] [IP: %(ip_address)s] [func: %(funcName)s] %(name)s %(levelname)s: %(message)s"
+        )
 
     # Setup coloredlogs for console output (with logger name and file path)
     coloredlogs.install(
