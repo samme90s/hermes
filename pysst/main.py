@@ -2,18 +2,12 @@ import time
 from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 from logger import get_logger
 from whisper import transcribe
 
 
 # Get logger with instance name
 logger = get_logger()
-
-
-class TranscriptionRequest(BaseModel):
-    audio_base64: bytes
-    language: str
 
 
 def _process_error(exc) -> JSONResponse:
@@ -26,9 +20,10 @@ def _process_error(exc) -> JSONResponse:
     
     # Return a JSON response:
     if isinstance(exc, ValueError):
+        # Perhaps return a static string here?
         return JSONResponse(
                 status_code=400,
-                content={"error": "Bad request"}
+                content={"error": str(exc)}
                 )
 
     # Default response for any other error
@@ -81,17 +76,19 @@ try:
         return {"hello": "world"}
 
     @app.post("/transcribe")
-    async def post_transcribe(file: UploadFile = File(...)):
-        logger.debug(f"Recieved files: {file.filename}, Content-Type: {file.content_type}")
-        audio_bytes = await file.read()
-        logger.debug(f"File size: {len(audio_bytes)} bytes")
+    async def post_transcribe(audio_file: UploadFile = File(...)):
+        logger.debug(f"Recieved files: {audio_file.filename}")
+        logger.debug(f"Content-Type: {audio_file.content_type}")
+
+        audio_bytes = await audio_file.read()
+        logger.debug(f"File size: {len(audio_bytes)} bytes"
+                     )
         transcription = transcribe(
             audio_bytes=audio_bytes,
-            language="en"
+            language="sv"
             )
         return {"transcription": transcription}
 
 except Exception as exc:
-    logger.error(f"internal_error={exc}")   # Logs the error message
-    logger.exception(exc)                   # Logs the full traceback
+    logger.exception(exc) # Logs the error and full traceback
 
