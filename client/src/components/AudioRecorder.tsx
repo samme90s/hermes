@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react"
 import AudioButton from "./AudioButton"
 import AudioControls from "./AudioControls"
-
-
-interface AudioTranscriptionResponse {
-    transcription: string
-}
-
+import { requestAudioTranscription } from "../services/api"
 
 export default function AudioRecorder() {
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
@@ -14,28 +9,10 @@ export default function AudioRecorder() {
     const [audioURL, setAudioURL] = useState<string | null>(null)
     const [transcription, setTranscription] = useState<string | null>(null)
 
-    async function requestAudioTranscription(audioBlob: Blob): Promise<AudioTranscriptionResponse> {
-        const formData = new FormData()
-        // Adding the file.webm ensures that most/all web browsers
-        // can interpret the expected file extension.
-        // This is a known issue in FireFox.
-        formData.append("file", audioBlob, "file.webm")
-        const res = await fetch("http://localhost:8000/transcribe", {
-            method: "POST",
-            body: formData,
-        })
-
-        if (!res.ok) {
-            throw new Error(`Request error: ${res.status} - ${res.statusText}`)
-        }
-
-        return res.json()
-    }
-
     async function setupMediaRecorder(): Promise<void> {
         try {
             if (!navigator?.mediaDevices) {
-                console.error("mediaDevices not supported")
+                console.error("MediaDevices not supported")
                 return
             }
 
@@ -56,14 +33,9 @@ export default function AudioRecorder() {
                 if (audioChunks.length > 0) {
                     const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType })
 
-                    console.log("Audio Blob:", audioBlob)
-                    console.log("Audio Blob Size:", audioBlob.size)
-                    console.log("Audio Blob Type:", audioBlob.type)
-
                     setAudioURL(URL.createObjectURL(audioBlob))
-                    const res = await requestAudioTranscription(audioBlob)
-                    console.log(res)
 
+                    const res = await requestAudioTranscription(audioBlob)
                     setTranscription(res.transcription)
 
                     // Reset chunks for the next recording session
