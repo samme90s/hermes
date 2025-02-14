@@ -2,6 +2,10 @@
 
 Python speech to text
 
+## Dependencies
+
+1. ffmpeg
+
 ## Development (Unix/MacOS/Windows)
 
 ### PDM

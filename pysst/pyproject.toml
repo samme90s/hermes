@@ -6,10 +6,10 @@ authors = [{ name = "Sam", email = "samme.s90@gmail.com" }]
 dependencies = [
     "transformers>=4.48.3",
     "llvmlite>=0.44.0",
-    "librosa>=0.10.2.post1",
     "torch>=2.6.0",
     "fastapi[standard]>=0.115.8",
     "coloredlogs>=15.0.1",
+    "numpy>=2.2.3",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"

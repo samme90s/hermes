@@ -14,7 +14,7 @@ export default function AudioRecorder() {
 
     async function requestAudioTranscription(audioBlob: Blob): Promise<AudioTranscriptionResponse> {
         const formData = new FormData()
-        formData.append("file", audioBlob, "file.webm")
+        formData.append("file", audioBlob)
         const res = await fetch("http://localhost:8000/transcribe", {
             method: "POST",
             body: formData,

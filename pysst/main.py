@@ -1,10 +1,10 @@
 import time
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from logger import get_logger
-from whisper import Base64Exception, transcribe_audio_base64
+from whisper import transcribe
 
 
 # Get logger with instance name
@@ -24,12 +24,6 @@ def _process_error(exc) -> JSONResponse:
     logger.error(f"server_exc={exc}")
     logger.exception(exc)
     
-    if isinstance(exc, Base64Exception):
-        return JSONResponse(
-                status_code=400,
-                content={"error": str(exc)}
-                )
-
     # Return a JSON response:
     if isinstance(exc, ValueError):
         return JSONResponse(
@@ -87,10 +81,11 @@ try:
         return {"hello": "world"}
 
     @app.post("/transcribe")
-    def transcribe(request: TranscriptionRequest):
-        transcription = transcribe_audio_base64(
-            audio_base64=request.audio_base64,
-            language=request.language
+    async def post_transcribe(file: UploadFile = File(...)):
+        audio_bytes = await file.read()
+        transcription = transcribe(
+            audio_bytes=audio_bytes,
+            language="en"
             )
         return {"transcription": transcription}
 
