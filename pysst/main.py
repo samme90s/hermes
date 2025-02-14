@@ -27,15 +27,21 @@ def _process_error(exc) -> JSONResponse:
     if isinstance(exc, Base64Exception):
         return JSONResponse(
                 status_code=400,
-                content={"detail": str(exc)}
+                content={"error": str(exc)}
                 )
 
     # Return a JSON response:
     if isinstance(exc, ValueError):
-        return JSONResponse(content={"detail": "Bad Request"}, status_code=400)
+        return JSONResponse(
+                status_code=400,
+                content={"error": "Bad request"}
+                )
 
     # Default response for any other error
-    return JSONResponse(content={"detail": "Internal Server Error"}, status_code=500)
+    return JSONResponse(
+            status_code=500,
+            content={"error": "Internal server error"}
+            )
 
 
 try:
@@ -65,8 +71,8 @@ try:
         try:
             # Process the request
             response = await call_next(request)
-        except Exception as err:
-            return _process_error(err)
+        except Exception as exc:
+            return _process_error(exc)
 
         # Calculate processing time
         process_time = (time.time() - start_time) * 1000
@@ -88,7 +94,7 @@ try:
             )
         return {"transcription": transcription}
 
-except Exception as err:
-    logger.error(f"internal_error={err}")   # Logs the error message
-    logger.exception(err)                   # Logs the full traceback
+except Exception as exc:
+    logger.error(f"internal_error={exc}")   # Logs the error message
+    logger.exception(exc)                   # Logs the full traceback
 
