@@ -17,7 +17,7 @@ logger = get_logger()
 
 # Load the Whisper processor and model (ensure you have the correct model checkpoint)
 # processor = WhisperProcessor.from_pretrained("openai/whisper-tiny.en")
-# This fixes the Pyright error when getting the encoder, and serves the same functionality as the commented above:
+# Fixes the Pyright error when getting the encoder, and serves the same functionality as the commented above:
 processor = cast(WhisperProcessor, WhisperProcessor.from_pretrained("openai/whisper-tiny.en"))
 model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny.en")
 # This enables ALL neurons ensuring consistent predictions,
@@ -72,6 +72,8 @@ def transcribe(audio_bytes: bytes, language: str = "en") -> str:
         forced_decoder_ids=forced_decoder_ids,
         attention_mask=attention_mask
     )
+    # Fixes the Pyright error when trying to retrieve the first index:
+    predicted_ids = cast(torch.Tensor, predicted_ids)
 
     # Decode the token IDs back into human-readable text
     transcription = processor.decode(predicted_ids[0], skip_special_tokens=True)
