@@ -1,11 +1,13 @@
-# logger.py
-import coloredlogs
+# logger.py (module)
+# Author: Sam <samme.s90@gmail.com>
+# Wrapper for the standard Python implementation of logging.
+# It acts a singleton passed around to avoid duplicate loggers.
 import logging
 import inspect
 import os
 
 # Get the log level
-log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+log_level = os.getenv("LOG_LEVEL", "DEBUG").upper()
 level = getattr(logging, log_level, logging.INFO)
 
 # Define the log directory and file path
@@ -16,6 +18,35 @@ try:
     os.makedirs(log_directory, exist_ok=True)
 except Exception as exc:
     raise SystemExit(f"Failed to create log directory: {exc}")
+
+
+# Define a custom formatter with ANSI color codes
+class CustomFormatter(logging.Formatter):
+    # ANSI escape codes for colors
+    grey = "\x1b[38;21m"
+    blue = "\x1b[34;01m"
+    yellow = "\x1b[33;01m"
+    red = "\x1b[31;01m"
+    bold_red = "\x1b[31;1m"
+    reset = "\x1b[0m"
+    
+    # Base format for log messages
+    log_format = "%(levelname)s (%(asctime)s) [name: %(name)s func: %(funcName)s] %(message)s"
+    
+    # Map each logging level to a color-coded format
+    FORMATS = {
+        logging.DEBUG: grey + log_format + reset,
+        logging.INFO: blue + log_format + reset,
+        logging.WARNING: yellow + log_format + reset,
+        logging.ERROR: red + log_format + reset,
+        logging.CRITICAL: bold_red + log_format + reset
+    }
+    
+    def format(self, record):
+        # Retrieve the format corresponding to the log record's level
+        log_fmt = self.FORMATS.get(record.levelno, self.log_format)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
 
 
 def get_logger(name: str = "") -> logging.Logger:
@@ -37,33 +68,23 @@ def get_logger(name: str = "") -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(level)  # Set logger level dynamically
 
-    # Define an enhanced format that now includes ip_address and the function name
-    formatter = logging.Formatter(
-        "(%(asctime)s) [%(pathname)s] [func: %(funcName)s] %(name)s %(levelname)s: %(message)s"
-        )
-
-    # Setup coloredlogs for console output (with logger name and file path)
-    coloredlogs.install(
-        level="DEBUG",
-        logger=logger,
-        fmt=formatter._fmt,
-        level_styles={
-            "debug": {"color": "green"},
-            "info": {"color": "blue"},
-            "error": {"color": "red"},
-            "warning": {"color": "yellow"},
-            "critical": {"color": "red", "bold": True}
-        }
-    )
+    # Create a stream handler for console output and assign the custom formatter
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(level)
+    console_handler.setFormatter(CustomFormatter())
 
     # Add FileHandler for logging to a file (with logger name and file path)
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(level)  # Use dynamic log level for file handler
 
     # Define format for file logs (with logger name and file path)
+    formatter = logging.Formatter("%(levelname)s (%(asctime)s) [name: %(name)s func: %(funcName)s] %(message)s")
     file_handler.setFormatter(formatter)
 
     # Avoid adding duplicate FileHandlers
+    # Add handlers if they are not already present
+    if not any(isinstance(handler, logging.StreamHandler) for handler in logger.handlers):
+        logger.addHandler(console_handler)
     if not any(isinstance(handler, logging.FileHandler) for handler in logger.handlers):
         logger.addHandler(file_handler)
 
