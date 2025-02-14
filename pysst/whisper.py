@@ -1,6 +1,8 @@
 # https://huggingface.co/openai/whisper-tiny.en
 # https://huggingface.co/docs/transformers/en/model_doc/whisper
 
+from typing import cast
+
 import subprocess
 import numpy as np
 # Provides PyTorch utilities for deep learning (e.g., tensor creation).
@@ -8,12 +10,15 @@ import torch
 # Prepares raw audio input into the format expected by the model.
 # WhisperForConditionalGeneration: The Whisper model adapted for sequence (text) generation.
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
+
 from logger import get_logger
 
 logger = get_logger()
 
 # Load the Whisper processor and model (ensure you have the correct model checkpoint)
-processor = WhisperProcessor.from_pretrained("openai/whisper-tiny.en")  
+# processor = WhisperProcessor.from_pretrained("openai/whisper-tiny.en")
+# This fixes the Pyright error when getting the encoder, and serves the same functionality as the commented above:
+processor = cast(WhisperProcessor, WhisperProcessor.from_pretrained("openai/whisper-tiny.en"))
 model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny.en")
 # This enables ALL neurons ensuring consistent predictions,
 # but potentially makes the model run slower!
