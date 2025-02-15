@@ -16,72 +16,84 @@ export default function AudioRecorder() {
                 return
             }
 
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-            const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" })
-            if (!MediaRecorder.isTypeSupported(mediaRecorder.mimeType)) {
-                console.error(`mimeType ${mediaRecorder.mimeType} is not supported`)
+            const mime = "audio/webm;codecs=opus"
+            if (!MediaRecorder.isTypeSupported(mime)) {
+                console.error(`Mime: ${mime} is not supported`)
                 return
             }
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            const mediaRecorder = new MediaRecorder(stream, { mimeType: mime })
 
+            // Callbacks
             let audioChunks: Blob[] = []
             mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    audioChunks.push(event.data)
+                // Return if no data
+                if (!event?.data || event.data.size <= 0) {
+                    return
                 }
+                audioChunks.push(event.data)
             }
             mediaRecorder.onstop = async () => {
-                if (audioChunks.length > 0) {
-                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType })
-
-                    setAudioURL(URL.createObjectURL(audioBlob))
-
-                    const res = await requestAudioTranscription(audioBlob)
-                    setTranscription(res.transcription)
-
-                    // Reset chunks for the next recording session
-                    audioChunks = []
+                // Return if no chunks are present
+                if (audioChunks.length <= 0) {
+                    return
                 }
+
+                const audioBlob = new Blob(
+                    audioChunks,
+                    {type: mime},
+                )
+                // Reset chunks for the next recording session
+                audioChunks = []
+
+                // Set states
+                setAudioURL(URL.createObjectURL(audioBlob))
+                const res = await requestAudioTranscription(audioBlob)
+                setTranscription(res.transcription)
             }
 
             setMediaRecorder(mediaRecorder)
+            console.info("MediaRecorder available")
         } catch (err) {
-            console.error(`recording error: ${err}`)
+            console.error(`Recording error: ${err}`)
         }
     }
 
-    function toggleRecording(): void {
+    function toggleRecording(): boolean {
         if (!mediaRecorder) {
-            console.error("MediaRecorder not set")
-            return
+            throw new Error("MediaRecorder not set")
         }
 
         if (!recording) {
             mediaRecorder.start()
             setRecording(true)
-            console.log("recording started")
-            return
+            return true
         }
-
-        if (recording) {
-            mediaRecorder.stop()
-            setRecording(false)
-            console.log("recording stopped")
-        }
+        mediaRecorder.stop()
+        setRecording(false)
+        return false
     }
 
     useEffect(() => {
         setupMediaRecorder()
     }, [])
 
-    useEffect(() => {
-        console.log("recorder set")
-    }, [mediaRecorder])
-
     return (
         <div>
             <AudioButton anim={recording} size={128} onClick={toggleRecording}></AudioButton>
             {audioURL && <AudioControls src={audioURL} />}
             {transcription && <p className="text-white">Transcription: {transcription}</p>}
+            <p className="text-white">
+                Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore
+                culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim
+                cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip
+                amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia.
+                Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor
+                Lorem duis laboris cupidatat officia voluptate. Culpa proident adipsicing id nulla
+                nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo
+                ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco
+                ut ea consectetur et est culpa et culpa duis.
+            </p>
         </div>
     )
 }

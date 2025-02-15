@@ -13,7 +13,7 @@ export default function AudioButton({ anim, size, ...props }: AudioButtonProps) 
     }
 
     return (
-        <div className="flex items-center justify-center h-full">
+        <div className="flex justify-center">
             <button
                 {...props}
                 className={cn(
@@ -22,8 +22,7 @@ export default function AudioButton({ anim, size, ...props }: AudioButtonProps) 
                     "hover:border-red-500",
                     "p-4",
                     "border-2 border-transparent transition-border duration-200 rounded-full",
-                    "flex items-center justify-center",
-                    "group"
+                    "group" // Group Elements to scale on button hover
                 )}
             >
                 <AudioWaveform className={"group-hover:scale-90 transition-transform duration-200"} size={size} />
