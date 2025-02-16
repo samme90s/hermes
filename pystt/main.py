@@ -66,8 +66,8 @@ try:
       
         # Log request info
         client_ip = request.client.host if request.client else "missing"
-        logger.info(f"ip: {client_ip}")
-        logger.info(f"method: {request.method} {request.url.path}")
+        logger.info(f"IP: {client_ip}")
+        logger.info(f"Method: {request.method} {request.url.path}")
 
         try:
             # Process the request
@@ -80,8 +80,8 @@ try:
         formatted_process_time = f"{process_time:.2f}ms"
 
         # Log response info and process time
-        logger.info(f"status: {response.status_code}")
-        logger.info(f"time: {formatted_process_time}")
+        logger.info(f"Status: {response.status_code}")
+        logger.info(f"Time: {formatted_process_time}")
 
         return response
 
