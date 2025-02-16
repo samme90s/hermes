@@ -10,7 +10,7 @@ from whisper import transcribe
 KB_MAX = 1024
 MB_MAX = KB_MAX * 1024
 
-ALLOWED_CONTENT_TYPES = {"audio/mpeg", "audio/wav", "audio/webm"}
+ALLOWED_CONTENT_TYPES = {"audio/mpeg", "audio/wave", "audio/webm"}
 
 
 # Get logger with instance name
@@ -67,7 +67,7 @@ try:
         # Log request info
         client_ip = request.client.host if request.client else "missing"
         logger.info(f"ip: {client_ip}")
-        logger.info(f"m: {request.method} {request.url.path}")
+        logger.info(f"method: {request.method} {request.url.path}")
 
         try:
             # Process the request
@@ -80,8 +80,8 @@ try:
         formatted_process_time = f"{process_time:.2f}ms"
 
         # Log response info and process time
-        logger.info(f"s: {response.status_code}")
-        logger.info(f"t: {formatted_process_time}")
+        logger.info(f"status: {response.status_code}")
+        logger.info(f"time: {formatted_process_time}")
 
         return response
 
