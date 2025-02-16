@@ -1,9 +1,16 @@
 import time
-from fastapi import FastAPI, File, Request, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from logger import get_logger
 from whisper import transcribe
+
+
+# Globals
+KB_MAX = 1024
+MB_MAX = KB_MAX * 1024
+
+ALLOWED_CONTENT_TYPES = {"audio/mpeg", "audio/wav", "audio/webm"}
 
 
 # Get logger with instance name
@@ -22,15 +29,15 @@ def _process_error(exc) -> JSONResponse:
     if isinstance(exc, ValueError):
         # Perhaps return a static string here?
         return JSONResponse(
-            status_code=400,
-            content={"error": str(exc)}
-        )
+                status_code=400,
+                content={"error": str(exc)}
+                )
 
     # Default response for any other error
     return JSONResponse(
-        status_code=500,
-        content={"error": "Internal server error"}
-    )
+            status_code=500,
+            content={"error": "Internal server error"}
+            )
 
 
 try:
@@ -82,14 +89,39 @@ try:
     async def post_transcribe(audio_file: UploadFile = File(...)):
         # Log file info for debug purposes
         logger.debug(f"Recieved files: {audio_file.filename}")
+
+        if audio_file.content_type is None:
+            raise HTTPException(
+                    status_code=400,
+                    detail="Missing Content-Type header in uploaded file"
+                    )
+
         logger.debug(f"Content-Type: {audio_file.content_type}")
+
+        # Extract the base type (ignoring codec parameters)
+        base_content_type = audio_file.content_type.split(";")[0].strip()
+        if base_content_type not in ALLOWED_CONTENT_TYPES:
+            raise HTTPException(
+                    status_code=415,
+                    detail=f"Unsupported file type. Supported formats: {', '.join(ALLOWED_CONTENT_TYPES)}"
+                    )
+
         audio_bytes = await audio_file.read()
-        logger.debug(f"File size: {len(audio_bytes)} bytes")
+        logger.debug(f"File size: {(len(audio_bytes) / KB_MAX):.2f} KB")
+        # Ensure that the file size is smaller than 1MB
+        # before trying to process it...
+        # (even though loading it in to memory here might not be as optimal)
+        if len(audio_bytes) > MB_MAX:
+            raise HTTPException(
+                    status_code=413,
+                    detail="File size exceeds the 1MB limit"
+                    )
 
         transcription = transcribe(
-            audio_bytes=audio_bytes,
-            language="en"
-        )
+                audio_bytes=audio_bytes,
+                language="en"
+                )
+
         return {"transcription": transcription}
 
 except Exception as exc:
