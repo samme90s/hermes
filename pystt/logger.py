@@ -1,21 +1,28 @@
 # logger.py (module)
-# Author: Sam <samme.s90@gmail.com>
 # Wrapper for the standard Python implementation of logging.
 # It acts a singleton passed around to avoid duplicate loggers.
 import logging
 import inspect
 import os
 
-# Get the log level
-log_level = os.getenv("LOG_LEVEL", "DEBUG").upper()
-level = getattr(logging, log_level, logging.INFO)
+# Define a single base format common to all handlers.
+BASE_FORMAT = "%(levelname)s (%(asctime)s) [name: %(name)s func: %(funcName)s] %(message)s"
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
+# Get the log level
+LOG_LEVEL = getattr(
+        logging,
+        os.getenv("LOG_LEVEL", "DEBUG").upper(),
+        logging.DEBUG
+        )
 # Define the log directory and file path
-log_directory = os.getenv("LOG_DIR", "./.logs/")
-log_file = os.path.join(log_directory, "combined.log")
+LOG_FILE = os.getenv(
+        key="LOG_FILE",
+        default="./.logs/combined.log"
+        )
 # Ensure log directory exists
 try:
-    os.makedirs(log_directory, exist_ok=True)
+    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 except Exception as exc:
     raise SystemExit(f"Failed to create log directory: {exc}")
 
@@ -29,23 +36,20 @@ class CustomFormatter(logging.Formatter):
     red = "\x1b[31;01m"
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
-    
-    # Base format for log messages
-    log_format = "%(levelname)s (%(asctime)s) [name: %(name)s func: %(funcName)s] %(message)s"
-    
+     
     # Map each logging level to a color-coded format
     FORMATS = {
-        logging.DEBUG: grey + log_format + reset,
-        logging.INFO: blue + log_format + reset,
-        logging.WARNING: yellow + log_format + reset,
-        logging.ERROR: red + log_format + reset,
-        logging.CRITICAL: bold_red + log_format + reset
-    }
+        logging.DEBUG: grey + BASE_FORMAT + reset,
+        logging.INFO: blue + BASE_FORMAT + reset,
+        logging.WARNING: yellow + BASE_FORMAT + reset,
+        logging.ERROR: red + BASE_FORMAT + reset,
+        logging.CRITICAL: bold_red + BASE_FORMAT + reset
+        }
     
     def format(self, record):
         # Retrieve the format corresponding to the log record's level
-        log_fmt = self.FORMATS.get(record.levelno, self.log_format)
-        formatter = logging.Formatter(log_fmt)
+        log_fmt = self.FORMATS.get(record.levelno, BASE_FORMAT)
+        formatter = logging.Formatter(log_fmt, datefmt=DATE_FORMAT)
         return formatter.format(record)
 
 
@@ -55,32 +59,35 @@ def get_logger(name: str = "") -> logging.Logger:
     Defaults to using the caller's filename as the logger name.
     '''
     if not name:
-        frame = inspect.currentframe()  # Get the current frame
+        frame = inspect.currentframe() 
         # Ensure that both the current frame and the caller's frame exist
         if frame is not None and frame.f_back is not None:
-            caller_file = inspect.getfile(frame.f_back)  # Get caller's file path
-            name = os.path.basename(caller_file)  # Extract just the filename
+            caller_file = inspect.getfile(frame.f_back)     # Get caller's file path
+            name = os.path.basename(caller_file)            # Extract just the filename
         else:
             # Fallback logger name if frame info is unavailable
             name = __name__
 
-    # Create or get a logger with the specified name
+    # MAIN LOGGER
+    # #############
     logger = logging.getLogger(name)
-    logger.setLevel(level)  # Set logger level dynamically
+    logger.setLevel(LOG_LEVEL)
 
-    # Create a stream handler for console output and assign the custom formatter
+    # CONSOLE
+    # #############
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(level)
+    console_handler.setLevel(LOG_LEVEL)
     console_handler.setFormatter(CustomFormatter())
 
-    # Add FileHandler for logging to a file (with logger name and file path)
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(level)  # Use dynamic log level for file handler
-
-    # Define format for file logs (with logger name and file path)
-    formatter = logging.Formatter("%(levelname)s (%(asctime)s) [name: %(name)s func: %(funcName)s] %(message)s")
+    # FILE
+    # #############
+    file_handler = logging.FileHandler(LOG_FILE)
+    file_handler.setLevel(LOG_LEVEL)
+    formatter = logging.Formatter(BASE_FORMAT, datefmt=DATE_FORMAT)
     file_handler.setFormatter(formatter)
 
+    # ATTACH OTHER
+    # #############
     # Avoid adding duplicate FileHandlers
     # Add handlers if they are not already present
     if not any(isinstance(handler, logging.StreamHandler) for handler in logger.handlers):
