@@ -2,9 +2,10 @@ import time
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
 from logger import get_logger
 from whisper import transcribe
-
+from llama import chatting
 
 # Globals
 KB_MAX = 1024
@@ -119,10 +120,17 @@ try:
 
         transcription = transcribe(
                 audio_bytes=audio_bytes,
-                language="sv"
+                language="en"
                 )
 
         return {"transcription": transcription}
+
+    @app.post("/chat")
+    def post_chat(content: str):
+        logger.debug(f"Recieved content: {content}")
+        response = chatting(content)
+        logger.debug(f"Response: {response}")
+        return {"response": response }
 
 except Exception as exc:
     logger.exception(exc) # Logs the error and full traceback
