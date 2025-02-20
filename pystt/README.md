@@ -4,19 +4,32 @@ Python speech to text
 
 ## Dependencies
 
-1. ffmpeg
+### ffmpeg
 
-## Development (Unix/MacOS/Windows)
+This mostly comes pre-installed on Linux distros,
+otherwise search on how to download it for your platform.
+
+```shell
+# Windows
+winget install ffmpeg
+```
+
+## Development
 
 ### PDM
 
-See [https://pdm-project.org/en/latest](https://pdm-project.org/en/latest) for installation process.
+See:
+[https://pdm-project.org/en/latest](https://pdm-project.org/en/latest)
+for installation process.
 
 ### Usage
 
 ```shell
 # Install dependencies and activate Python environment
 pdm install &&
+# Windows
+./.venv/Scripts/activate.ps1
+# Linux
 source .venv/bin/activate
 ```
 
@@ -24,4 +37,3 @@ source .venv/bin/activate
 # Run program
 fastapi dev
 ```
-
