@@ -17,7 +17,7 @@ export default function AudioButton({ anim, size, ...props }: AudioButtonProps) 
             <button
                 {...props}
                 className={cn(
-                    anim && "animate-pulse shadow-border-red",
+                    anim ? "animate-pulse shadow-border-red" : "shadow-xl",
                     "bg-black text-white",
                     "hover:border-red-500",
                     "p-4",

@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react"
 import AudioButton from "./AudioButton"
-import { AudioTranscriptionResponse } from "../services/api"
 
 interface AudioRecorderProps {
-    errorCallback?: (error: string | null) => void
-    requestAudioTranscription: (audioBlob: Blob) => Promise<AudioTranscriptionResponse>
-    requestCallback: (response: AudioTranscriptionResponse) => void
+    errorCallback?: (error: string) => void
+    blobCallback: (audioBlob: Blob) => void
 }
 
-export default function AudioRecorder({ errorCallback, requestAudioTranscription, requestCallback }: AudioRecorderProps) {
+export default function AudioRecorder({ errorCallback, blobCallback }: AudioRecorderProps) {
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
     const [recording, setRecording] = useState<boolean>(false)
 
@@ -50,14 +48,11 @@ export default function AudioRecorder({ errorCallback, requestAudioTranscription
                     return
                 }
 
-                const audioBlob = new Blob(
-                    audioChunks,
-                    { type: mime },
-                )
+                const audioBlob = new Blob(audioChunks, { type: mime })
+                blobCallback(audioBlob)
+
                 // Reset chunks for the next recording session
                 audioChunks = []
-
-                requestCallback(await requestAudioTranscription(audioBlob))
             }
 
             setMediaRecorder(mediaRecorder)
