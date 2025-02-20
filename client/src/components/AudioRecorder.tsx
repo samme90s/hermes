@@ -1,25 +1,34 @@
 import { useEffect, useState } from "react"
 import AudioButton from "./AudioButton"
-import AudioControls from "./AudioControls"
 import { requestAudioTranscription } from "../services/api"
-import TranscriptBox from "./TranscriptBox"
 
-export default function AudioRecorder() {
+interface AudioRecorderProps {
+    errorCallback?: (error: string | null) => void
+    recordingCallback: (audioURL: string, transcription: string | null) => void
+}
+
+export default function AudioRecorder({ errorCallback, recordingCallback }: AudioRecorderProps) {
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
     const [recording, setRecording] = useState<boolean>(false)
-    const [audioURL, setAudioURL] = useState<string | null>(null)
-    const [transcription, setTranscription] = useState<string | null>(null)
+
+    useEffect(() => {
+        setupMediaRecorder()
+    }, [])
 
     async function setupMediaRecorder(): Promise<void> {
         try {
             if (!navigator?.mediaDevices) {
-                console.error("MediaDevices not supported")
+                const message = "MediaDevices not supported"
+                errorCallback && errorCallback(message)
+                console.error(message)
                 return
             }
 
             const mime = "audio/webm;codecs=opus"
             if (!MediaRecorder.isTypeSupported(mime)) {
-                console.error(`Mime: ${mime} is not supported`)
+                const message = `Mime: ${mime} is not supported`
+                errorCallback && errorCallback(message)
+                console.error(message)
                 return
             }
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -48,21 +57,26 @@ export default function AudioRecorder() {
                 audioChunks = []
 
                 // Set states
-                setAudioURL(URL.createObjectURL(audioBlob))
+                const audioUrl = URL.createObjectURL(audioBlob)
                 const res = await requestAudioTranscription(audioBlob)
-                setTranscription(res.transcription)
+                recordingCallback(audioUrl, res.transcription)
             }
 
             setMediaRecorder(mediaRecorder)
             console.info("MediaRecorder available")
         } catch (err) {
-            console.error(`Recording error: ${err}`)
+            const message = `Recording error: ${err}`
+            errorCallback && errorCallback(message)
+            console.error(message)
         }
     }
 
     function toggleRecording(): boolean {
         if (!mediaRecorder) {
-            throw new Error("MediaRecorder not set")
+            const message = "MediaRecorder not set"
+            errorCallback && errorCallback(message)
+            console.error(message)
+            return false
         }
 
         if (!recording) {
@@ -75,15 +89,9 @@ export default function AudioRecorder() {
         return false
     }
 
-    useEffect(() => {
-        setupMediaRecorder()
-    }, [])
-
     return (
         <div>
             <AudioButton anim={recording} size={128} onClick={toggleRecording}></AudioButton>
-            {audioURL && <AudioControls src={audioURL} />}
-            {transcription && <TranscriptBox transcription={transcription} />}
         </div>
     )
 }

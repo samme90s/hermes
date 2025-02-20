@@ -4,7 +4,7 @@
 @theme {
     /* https://tailwindcss.com/docs/box-shadow */
     /* shadow-(<custom-property>) | box-shadow: var(<custom-property>); */
-    --shadow-border-red: 0 0 15px 10px rgba(255, 0, 0, 0.4);
+    --shadow-border-red: 0 0 2rem 1rem rgba(255, 0, 0, 0.4);
 }
 
 html,
