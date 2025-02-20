@@ -24,7 +24,7 @@ def _process_error(exc) -> JSONResponse:
     # Log the error with stack trace
     logger.error(f"server_exc={exc}")
     logger.exception(exc)
-    
+
     # Return a JSON response:
     if isinstance(exc, ValueError):
         # Perhaps return a static string here?
@@ -63,7 +63,7 @@ try:
         Middleware to log requests and responses using "HTTP" log level
         '''
         start_time = time.time()
-      
+
         # Log request info
         client_ip = request.client.host if request.client else "missing"
         logger.info(f"IP: {client_ip}")
@@ -119,7 +119,7 @@ try:
 
         transcription = transcribe(
                 audio_bytes=audio_bytes,
-                language="en"
+                language="sv"
                 )
 
         return {"transcription": transcription}

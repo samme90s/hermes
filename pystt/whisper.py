@@ -18,11 +18,11 @@ logger = get_logger()
 # Load the Whisper processor and model (ensure you have the correct model checkpoint)
 # processor = WhisperProcessor.from_pretrained("openai/whisper-tiny.en")
 # Fixes the Pyright error when getting the encoder, and serves the same functionality as the commented above:
-processor = cast(WhisperProcessor, WhisperProcessor.from_pretrained("openai/whisper-tiny.en"))
-model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny.en")
+processor = cast(WhisperProcessor, WhisperProcessor.from_pretrained("openai/whisper-small"))
+model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-small")
 # This enables ALL neurons ensuring consistent predictions,
 # but potentially makes the model run slower!
-model.eval() 
+model.eval()
 
 def transcribe(audio_bytes: bytes, language: str = "en") -> str:
     """
@@ -31,7 +31,7 @@ def transcribe(audio_bytes: bytes, language: str = "en") -> str:
     # Use FFmpeg to decode and resample to 16 kHz
     process = subprocess.run(
         [
-            "ffmpeg", "-i", "pipe:0",  
+            "ffmpeg", "-i", "pipe:0",
             "-vn",                      # Ignore any video stream
             "-ar", "16000",             # Resample to 16 kHz
             "-ac", "1",                 # Convert to mono
@@ -49,7 +49,7 @@ def transcribe(audio_bytes: bytes, language: str = "en") -> str:
     #     logger.debug("FFmpeg stderr: " + process.stderr.decode())
 
     # Extract bytes from FFmpeg output
-    audio_data = process.stdout 
+    audio_data = process.stdout
     # Convert bytes into a NumPy array for Whisper processing
     # Define the maximum value for 16-bit signed integers
     int16_max = np.iinfo(np.int16).max  # This will give 32767
@@ -77,9 +77,8 @@ def transcribe(audio_bytes: bytes, language: str = "en") -> str:
 
     # Decode the token IDs back into human-readable text
     transcription = processor.decode(predicted_ids[0], skip_special_tokens=True)
-    
+
     if not isinstance(transcription, str):
         raise ValueError("Transcription must be a string")
 
     return transcription.strip()
-
