@@ -42,7 +42,7 @@ export default function AudioRecorder() {
 
                 const audioBlob = new Blob(
                     audioChunks,
-                    {type: mime},
+                    { type: mime },
                 )
                 // Reset chunks for the next recording session
                 audioChunks = []

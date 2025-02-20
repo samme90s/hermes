@@ -1,4 +1,4 @@
-interface AudioControlsProps extends React.AudioHTMLAttributes<HTMLAudioElement> {}
+interface AudioControlsProps extends React.AudioHTMLAttributes<HTMLAudioElement> { }
 
 export default function AudioControls({ ...props }: AudioControlsProps) {
     return (
