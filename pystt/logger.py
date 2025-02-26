@@ -36,7 +36,7 @@ class CustomFormatter(logging.Formatter):
     red = "\x1b[31;01m"
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
-     
+
     # Map each logging level to a color-coded format
     FORMATS = {
         logging.DEBUG: grey + BASE_FORMAT + reset,
@@ -45,7 +45,7 @@ class CustomFormatter(logging.Formatter):
         logging.ERROR: red + BASE_FORMAT + reset,
         logging.CRITICAL: bold_red + BASE_FORMAT + reset
         }
-    
+
     def format(self, record):
         # Retrieve the format corresponding to the log record's level
         log_fmt = self.FORMATS.get(record.levelno, BASE_FORMAT)
@@ -59,7 +59,7 @@ def get_logger(name: str = "") -> logging.Logger:
     Defaults to using the caller's filename as the logger name.
     '''
     if not name:
-        frame = inspect.currentframe() 
+        frame = inspect.currentframe()
         # Ensure that both the current frame and the caller's frame exist
         if frame is not None and frame.f_back is not None:
             caller_file = inspect.getfile(frame.f_back)     # Get caller's file path
@@ -81,7 +81,9 @@ def get_logger(name: str = "") -> logging.Logger:
 
     # FILE
     # #############
-    file_handler = logging.FileHandler(LOG_FILE)
+    # Setting the encoding to UTF-8 here to prevent exceptions upon
+    # handling characters such as emojis that are larger than 16-bit
+    file_handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
     file_handler.setLevel(LOG_LEVEL)
     formatter = logging.Formatter(BASE_FORMAT, datefmt=DATE_FORMAT)
     file_handler.setFormatter(formatter)
