@@ -2,14 +2,16 @@ import { useEffect, useState } from "react"
 import AudioButton from "./AudioButton"
 
 interface AudioRecorderProps {
-    errorCallback?: (error: string) => void
     blobCallback: (audioBlob: Blob) => void
+    errorCallback?: (error: string | null) => void
 }
 
-export default function AudioRecorder({ errorCallback, blobCallback }: AudioRecorderProps) {
+export default function AudioRecorder({ blobCallback, errorCallback }: AudioRecorderProps) {
+    const [error, setError] = useState<string | null>(null)
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
     const [recording, setRecording] = useState<boolean>(false)
 
+    useEffect(() => errorCallback && errorCallback(error), [error])
     useEffect(() => {
         setupMediaRecorder()
     }, [])
@@ -17,17 +19,13 @@ export default function AudioRecorder({ errorCallback, blobCallback }: AudioReco
     async function setupMediaRecorder(): Promise<void> {
         try {
             if (!navigator?.mediaDevices) {
-                const message = "MediaDevices not supported"
-                errorCallback && errorCallback(message)
-                console.error(message)
+                setError("MediaDevices not supported")
                 return
             }
 
             const mime = "audio/webm;codecs=opus"
             if (!MediaRecorder.isTypeSupported(mime)) {
-                const message = `Mime: ${mime} is not supported`
-                errorCallback && errorCallback(message)
-                console.error(message)
+                setError(`Mime: ${mime} is not supported`)
                 return
             }
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -56,25 +54,22 @@ export default function AudioRecorder({ errorCallback, blobCallback }: AudioReco
             }
 
             setMediaRecorder(mediaRecorder)
-            console.info("MediaRecorder available")
+            setError(null)
         } catch (err) {
-            const message = `Recording error: ${err}`
-            errorCallback && errorCallback(message)
-            console.error(message)
+            setError(`Recording error: ${err}`)
         }
     }
 
     function toggleRecording(): boolean {
         if (!mediaRecorder) {
-            const message = "MediaRecorder not set"
-            errorCallback && errorCallback(message)
-            console.error(message)
+            setError("MediaRecorder not set")
             return false
         }
 
         if (!recording) {
             mediaRecorder.start()
             setRecording(true)
+            setError(null)
             return true
         }
         mediaRecorder.stop()

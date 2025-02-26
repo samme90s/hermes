@@ -22,7 +22,7 @@ processor = cast(WhisperProcessor, WhisperProcessor.from_pretrained("openai/whis
 model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-tiny.en")
 # This enables ALL neurons ensuring consistent predictions,
 # but potentially makes the model run slower!
-model.eval()
+# model.eval()
 
 def transcribe(audio_bytes: bytes, language: str = "en") -> str:
     """

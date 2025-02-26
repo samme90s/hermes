@@ -21,19 +21,3 @@ export async function requestAudioTranscription(audioBlob: Blob): Promise<AudioT
 
     return res.json()
 }
-
-export interface ChatResponse {
-    response: string
-}
-
-export async function requestChat(text: string): Promise<ChatResponse> {
-    const res = await fetch(`http://localhost:8000/chat?content=${text}`, {
-        method: "POST",
-    })
-
-    if (!res.ok) {
-        throw new Error(`Request error: ${res.status} - ${res.statusText}`)
-    }
-
-    return res.json()
-}
