@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:33b05da8562f8db5a5bb58869a868d3b2a7f9b414fc896df76a075c473903412"
+content_hash = "sha256:372729a94d88ef3069b2776ab00eb400d9ff2d487b1b167551a0102718e64655"
 
 [[metadata.targets]]
 requires_python = "==3.12.*"
@@ -688,6 +688,16 @@ files = [
     {file = "pygments-2.19.1-py3-none-any.whl", hash = "sha256:9ea1544ad55cecf4b8242fab6dd35a93bbce657034b0611ee383099054ab6d8c"},
     {file = "pygments-2.19.1.tar.gz", hash = "sha256:61c16d2a8576dc0649d9f39e089b5f02bcd27fba10d8fb4dcc28173f7a45151f"},
 ]
+
+[[package]]
+name = "pylo"
+version = "0.1.0"
+requires_python = ">=3.12"
+git = "https://github.com/samme90s/pylo.git"
+ref = "v0.1.1"
+revision = "27367a3bfbaa032273e4a9c5777815ff64834868"
+summary = "A custom logger module"
+groups = ["default"]
 
 [[package]]
 name = "python-dotenv"

@@ -3,7 +3,7 @@ from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from logger import get_logger
+from pylo import get_logger
 from whisper import transcribe
 from llama import chatting
 
