@@ -9,9 +9,8 @@
     "type": "module",
     "private": true,
     "scripts": {
-        "dev": "concurrently \"vite\" \"tsc --project electron/tsconfig.json --watch\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron ./dist/electron/main.js\"",
-        "build": "vite build && tsc --project electron/tsconfig.json",
-        "start": "cross-env NODE_ENV=production electron ./dist/electron/main.js"
+        "dev": "vite",
+        "build": "tsc -b && vite build"
     },
     "dependencies": {
         "lucide-react": "^0.474.0",
@@ -26,14 +25,11 @@
         "autoprefixer": "^10.4.20",
         "clsx": "^2.1.1",
         "concurrently": "^9.1.2",
-        "cross-env": "^7.0.3",
-        "electron": "^34.3.0",
         "globals": "^15.14.0",
         "postcss": "^8.5.1",
         "tailwind-merge": "^3.0.1",
         "tailwindcss": "^4.0.3",
         "typescript": "~5.6.2",
-        "vite": "^6.0.5",
-        "wait-on": "^8.0.2"
+        "vite": "^6.0.5"
     }
 }
