@@ -11,7 +11,7 @@ export default function AudioButton({ pulse, className, ...props }: AudioButtonP
         <button
             {...props}
             className={cn(
-                "bg-black text-white",
+                "bg-neutral-900 text-white",
                 "hover:border-red-500",
                 "p-2 sm:p-3 md:p-4",
                 "border-2 border-transparent transition-border duration-200 rounded-full",
@@ -24,7 +24,7 @@ export default function AudioButton({ pulse, className, ...props }: AudioButtonP
                 // Adjust the icon size with responsive utility classes.
                 className={cn(
                     "group-hover:scale-80 transition-transform duration-200",
-                    "w-20 h-20 sm:w-26 sm:h-26 md:w-32 md:h-32 scale-70",
+                    "w-18 h-18 sm:w-22 sm:h-22 md:w-26 md:h-26 scale-70",
                     pulse && "scale-80"
                 )}
             />

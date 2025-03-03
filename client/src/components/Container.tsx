@@ -12,9 +12,8 @@ function Container({ children, className }: ContainerProps, ref: React.Ref<HTMLD
             ref={ref}
             className={cn(
                 "w-full",
-                "max-h-screen",
                 "p-2",
-                "bg-neutral-200",
+                "bg-neutral-100",
                 "box-border border-neutral-300 border rounded-lg",
                 "overflow-y-auto",
                 className

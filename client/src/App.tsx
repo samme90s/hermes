@@ -76,8 +76,8 @@ export default function App() {
     useEffect(() => void handlePrompt(), [blob])
 
     return (
-        <div className="max-w-lg mx-auto flex flex-col items-center justify-center space-y-4">
-            <Container ref={containerRef} className="flex-1 flex flex-col space-y-4">
+        <div className="max-w-lg h-screen mx-auto flex flex-col items-center justify-center space-y-4">
+            <Container ref={containerRef} className="max-h-screen flex-1 flex flex-col space-y-4">
                 {dialogs.map(createDialogElement)}
                 {promptLoading && <Dialog className={DialogAlignment.END}><Loading color={HexColors.RED} /></Dialog>}
                 {answerLoading && <Dialog className={DialogAlignment.START}><Loading color={HexColors.RED} /></Dialog>}
