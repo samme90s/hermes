@@ -1,6 +1,6 @@
 {
     "name": "client",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "author": {
         "name": "Sam",
         "email": "samme.s90@gmail.com"
@@ -9,9 +9,10 @@
     "type": "module",
     "private": true,
     "scripts": {
-        "dev": "vite",
-        "build": "tsc -b && vite build",
-        "preview": "vite preview"
+        "dev": "concurrently \"vite\" \"tsc --project electron/tsconfig.json --watch\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron ./dist/electron/main.js\"",
+        "build:electron": "tsc --project electron/tsconfig.json",
+        "build": "vite build && npm run build:electron",
+        "start": "cross-env NODE_ENV=production electron ./dist/electron/main.js"
     },
     "dependencies": {
         "lucide-react": "^0.474.0",
@@ -25,11 +26,15 @@
         "@vitejs/plugin-react": "^4.3.4",
         "autoprefixer": "^10.4.20",
         "clsx": "^2.1.1",
+        "concurrently": "^9.1.2",
+        "cross-env": "^7.0.3",
+        "electron": "^34.3.0",
         "globals": "^15.14.0",
         "postcss": "^8.5.1",
         "tailwind-merge": "^3.0.1",
         "tailwindcss": "^4.0.3",
         "typescript": "~5.6.2",
         "vite": "^6.0.5",
+        "wait-on": "^8.0.2"
     }
 }
