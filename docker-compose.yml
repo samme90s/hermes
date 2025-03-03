@@ -1,0 +1,24 @@
+services:
+  app:
+    container_name: app
+    build:
+      context: ./client/
+      dockerfile: Dockerfile
+    networks:
+      - net
+    ports:
+      - 80:80
+
+  mercury:
+    container_name: mercury
+    build:
+      context: ./mercury/
+      dockerfile: Dockerfile
+    networks:
+      - net
+    ports:
+      - 8000:8000
+
+networks:
+  net:
+    name: net
