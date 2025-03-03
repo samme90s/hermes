@@ -2,19 +2,19 @@ import { useEffect, useState } from "react"
 import AudioButton from "./AudioButton"
 
 interface AudioRecorderProps {
-    blobCallback: (audioBlob: Blob) => void
-    errorCallback?: (error: string | null) => void
+    onChange: (audioBlob: Blob) => void
+    disabled?: boolean
+    onError?: (error: string) => void
+    className?: string
 }
 
-export default function AudioRecorder({ blobCallback, errorCallback }: AudioRecorderProps) {
-    const [error, setError] = useState<string | null>(null)
+export default function AudioRecorder({ onChange, disabled, onError, className }: AudioRecorderProps) {
+    const [error, setError] = useState<string>("")
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
     const [recording, setRecording] = useState<boolean>(false)
 
-    useEffect(() => errorCallback && errorCallback(error), [error])
-    useEffect(() => {
-        setupMediaRecorder()
-    }, [])
+    useEffect(() => onError && onError(error), [error])
+    useEffect(() => void setupMediaRecorder(), [])
 
     async function setupMediaRecorder(): Promise<void> {
         try {
@@ -47,14 +47,14 @@ export default function AudioRecorder({ blobCallback, errorCallback }: AudioReco
                 }
 
                 const audioBlob = new Blob(audioChunks, { type: mime })
-                blobCallback(audioBlob)
+                onChange(audioBlob)
 
                 // Reset chunks for the next recording session
                 audioChunks = []
             }
 
             setMediaRecorder(mediaRecorder)
-            setError(null)
+            setError("")
         } catch (err) {
             setError(`Recording error: ${err}`)
         }
@@ -69,7 +69,7 @@ export default function AudioRecorder({ blobCallback, errorCallback }: AudioReco
         if (!recording) {
             mediaRecorder.start()
             setRecording(true)
-            setError(null)
+            setError("")
             return true
         }
         mediaRecorder.stop()
@@ -78,8 +78,6 @@ export default function AudioRecorder({ blobCallback, errorCallback }: AudioReco
     }
 
     return (
-        <div>
-            <AudioButton pulse={recording} onClick={toggleRecording}></AudioButton>
-        </div>
+        <AudioButton disabled={disabled} pulse={recording} onClick={toggleRecording} className={className}></AudioButton>
     )
 }

@@ -1,3 +1,5 @@
+const domain = "http://localhost:8000"
+
 export interface AudioTranscriptionResponse {
     transcription: string
 }
@@ -10,7 +12,7 @@ export async function requestAudioTranscription(audioBlob: Blob): Promise<AudioT
     //
     // "audio_file" argument here must match with the backend!
     formData.append("audio_file", audioBlob, "file.webm")
-    const res = await fetch("http://localhost:8000/transcribe", {
+    const res = await fetch(`${domain}/transcribe`, {
         method: "POST",
         body: formData,
     })
