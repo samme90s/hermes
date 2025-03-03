@@ -13,20 +13,11 @@ the project.
 This project uses [Bun](https://bun.sh/), but Node works just as well
 without having to modify anything!
 
-### Unix/MacOS/Windows
-
-#### Dependencies
+### Usage
 
 ```shell
-# Install project dependencies
-bun install
-```
-
-#### Usage
-
-```shell
-# Run the program
-bun dev
+# Install project dependencies and run
+bun install && bun dev
 # Shortened version but does the same thing as:
-# bun run dev
+# bun run <command>
 ```

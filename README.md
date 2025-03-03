@@ -10,7 +10,6 @@ efficient, low-latency speech-to-text processing.
 
 ```txt
 .
-|-assets (used for developement purposes mostly)
-|-client (frontend)
---pystt  (microservice)
+|-client    (frontend)
+--mercury   (microservice)
 ```

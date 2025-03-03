@@ -12,4 +12,6 @@ otherwise search on how to download it for your platform.
 ```shell
 # Windows
 winget install ffmpeg
+# Ubuntu
+apt-get update && apt-get install ffmpeg
 ```
