@@ -4,9 +4,10 @@ import { cn } from "../lib/utils"
 interface AudioButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     anim: boolean
     size: number
+    className?: string
 }
 
-export default function AudioButton({ anim, size, ...props }: AudioButtonProps) {
+export default function AudioButton({ anim, size, className, ...props }: AudioButtonProps) {
     // Ensures that the button can never be smaller than 16 pixels.
     if (size < 16) {
         size = 16
@@ -22,10 +23,11 @@ export default function AudioButton({ anim, size, ...props }: AudioButtonProps) 
                     "hover:border-red-500",
                     "p-4",
                     "border-2 border-transparent transition-border duration-200 rounded-full",
-                    "group" // Group Elements to scale on button hover
+                    "group", // Group Elements to scale on button hover
+                    {className}
                 )}
             >
-                <AudioWaveform className={"group-hover:scale-90 transition-transform duration-200"} size={size} />
+                <AudioWaveform className={"group-hover:scale-90 transition-transform duration-200"} />
             </button>
         </div>
     )
