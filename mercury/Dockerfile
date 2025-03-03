@@ -28,10 +28,6 @@ RUN pdm install --check --prod --no-editable
 ENV HF_HOME=/root/.cache/huggingface
 ENV HF_HUB_DISABLE_SYMLINKS_WARNING=1
 
-# (Optional) Ensure that Transformers is installed.
-# If it's already defined as a dependency in your pyproject.toml, you can skip this step.
-RUN pip install transformers
-
 # Pre-download the model and tokenizer from Hugging Face so that caching occurs during build.
 RUN pdm run python -c "from transformers import AutoModel, AutoTokenizer; \
                       AutoModel.from_pretrained('openai/whisper-tiny.en'); \
