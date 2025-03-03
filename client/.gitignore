@@ -2,9 +2,3 @@
 **/*logs/
 **/*dist/
 **/*node_modules/
-
-# files
-**/*.env
-**/*.log
-**/*.pdm-python
-**/*.python-version
