@@ -10,8 +10,7 @@
     "private": true,
     "scripts": {
         "dev": "concurrently \"vite\" \"tsc --project electron/tsconfig.json --watch\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron ./dist/electron/main.js\"",
-        "build:electron": "tsc --project electron/tsconfig.json",
-        "build": "vite build && npm run build:electron",
+        "build": "vite build && tsc --project electron/tsconfig.json",
         "start": "cross-env NODE_ENV=production electron ./dist/electron/main.js"
     },
     "dependencies": {
