@@ -79,7 +79,7 @@ export default function AudioRecorder({ blobCallback, errorCallback }: AudioReco
 
     return (
         <div>
-            <AudioButton anim={recording} size={128} onClick={toggleRecording}></AudioButton>
+            <AudioButton pulse={recording} onClick={toggleRecording}></AudioButton>
         </div>
     )
 }
