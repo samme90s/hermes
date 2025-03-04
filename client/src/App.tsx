@@ -17,6 +17,7 @@ interface DialogItem {
 }
 
 export default function App() {
+    const [error, setError] = useState<string>("")
     const [blob, setBlob] = useState<Blob | null>(null)
     const [answerLoading, setAnswerLoading] = useState<boolean>(false)
     const [promptLoading, setPromptLoading] = useState<boolean>(false)
@@ -84,6 +85,7 @@ export default function App() {
                 <AudioRecorder
                     disabled={(promptLoading || answerLoading)}
                     onChange={setBlob}
+                    onError={setError}
                     className="mx-auto"
                 />
             </Container>

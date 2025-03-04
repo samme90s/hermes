@@ -3,29 +3,27 @@ import AudioButton from "./AudioButton"
 
 interface AudioRecorderProps {
     onChange: (audioBlob: Blob) => void
+    onError: (error: string) => void
     disabled?: boolean
-    onError?: (error: string) => void
     className?: string
 }
 
 export default function AudioRecorder({ onChange, disabled, onError, className }: AudioRecorderProps) {
-    const [error, setError] = useState<string>("")
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
     const [recording, setRecording] = useState<boolean>(false)
 
-    useEffect(() => onError && onError(error), [error])
     useEffect(() => void setupMediaRecorder(), [])
 
     async function setupMediaRecorder(): Promise<void> {
         try {
             if (!navigator?.mediaDevices) {
-                setError("MediaDevices not supported")
+                onError("MediaDevices not supported")
                 return
             }
 
             const mime = "audio/webm;codecs=opus"
             if (!MediaRecorder.isTypeSupported(mime)) {
-                setError(`Mime: ${mime} is not supported`)
+                onError(`Mime: ${mime} is not supported`)
                 return
             }
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -54,22 +52,22 @@ export default function AudioRecorder({ onChange, disabled, onError, className }
             }
 
             setMediaRecorder(mediaRecorder)
-            setError("")
+            onError("")
         } catch (err) {
-            setError(`Recording error: ${err}`)
+            onError(`Recording error: ${err}`)
         }
     }
 
     function toggleRecording(): boolean {
         if (!mediaRecorder) {
-            setError("MediaRecorder not set")
+            onError("MediaRecorder not set")
             return false
         }
 
         if (!recording) {
             mediaRecorder.start()
             setRecording(true)
-            setError("")
+            onError("")
             return true
         }
         mediaRecorder.stop()
