@@ -119,7 +119,7 @@ try:
 
         transcription = transcribe(
                 audio_bytes=audio_bytes,
-                language="en"
+                language="sv"
                 )
 
         return {"transcription": transcription}
