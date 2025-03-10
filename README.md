@@ -6,6 +6,15 @@ messenger of the Greek gods, this project is designed to bridge the gap between
 voice input and digital interaction. It provides a robust client integration for
 efficient, low-latency speech-to-text processing.
 
+## Tree
+
+```shell
+.
+|- src
+   |- hermes (frontend)
+   |- pluto  (gateway)
+```
+
 ## Development
 
 ### Bun
