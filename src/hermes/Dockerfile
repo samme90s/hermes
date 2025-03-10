@@ -4,7 +4,6 @@
 #
 # This stage is used to build the application.
 FROM oven/bun:latest AS builder
-# FROM node:22.12.0-alpine3.19 AS builder
 
 # Creates a working directory in the Docker image.
 # The application will be placed here.
@@ -15,13 +14,11 @@ WORKDIR /usr/src/app
 # As a result, the Docker image layer with installed dependencies is only rebuilt when these files change.
 COPY bun.lock .
 COPY package.json .
-# COPY package*.json .
 
 # Runs the npm install command to install the dependencies specified in the package.json file.
 #
 # Using "npm ci" for production build.
 RUN bun install
-# RUN npm ci
 
 # Copies the rest of the application code to the app directory.
 COPY src/ src/
@@ -31,7 +28,6 @@ COPY vite.config.ts .
 
 # Runs the build script set in the package.json file.
 RUN bun run build
-# RUN npm run build
 
 
 # STAGE 2 [Production]
