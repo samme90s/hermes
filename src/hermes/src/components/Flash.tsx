@@ -1,3 +1,4 @@
+import { FC } from "react"
 import { cn } from "../lib/utils"
 
 interface FlashProps {
@@ -5,7 +6,7 @@ interface FlashProps {
     className?: string
 }
 
-export default function Flash({ message, className }: FlashProps) {
+export const Flash: FC<FlashProps> = ({ message, className }) => {
     return (
         <div
             className={cn(

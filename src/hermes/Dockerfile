@@ -29,7 +29,6 @@ COPY vite.config.ts .
 # Runs the build script set in the package.json file.
 RUN bun run build
 
-
 # STAGE 2 [Production]
 ############################
 # Specifies a base image, a specific version of the Nginx image.

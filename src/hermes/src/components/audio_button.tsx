@@ -1,12 +1,13 @@
 import { AudioWaveform } from "lucide-react"
 import { cn } from "../lib/utils"
+import { FC } from "react"
 
 interface AudioButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     pulse: boolean
     className?: string
 }
 
-export default function AudioButton({ pulse, className, ...props }: AudioButtonProps) {
+export const AudioButton: FC<AudioButtonProps> = ({ pulse, className, ...props }) => {
     return (
         <button
             {...props}

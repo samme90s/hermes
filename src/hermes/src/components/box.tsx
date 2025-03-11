@@ -1,12 +1,12 @@
 import { forwardRef } from "react"
 import { cn } from "../lib/utils"
 
-interface ContainerProps {
+interface BoxProps {
     children: React.ReactNode
     className?: string
 }
 
-function Container({ children, className }: ContainerProps, ref: React.Ref<HTMLDivElement>) {
+export const Box = forwardRef<HTMLDivElement, BoxProps>(({ children, className }, ref) => {
     return (
         <div
             ref={ref}
@@ -22,6 +22,4 @@ function Container({ children, className }: ContainerProps, ref: React.Ref<HTMLD
             {children}
         </div>
     )
-}
-
-export default forwardRef(Container)
+})

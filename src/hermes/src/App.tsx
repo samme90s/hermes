@@ -1,94 +1,66 @@
-import { useEffect, useRef, useState } from "react"
-import AudioRecorder from "./components/AudioRecorder"
-import { requestAudioTranscription } from "./services/api"
-import Loading from "./components/Loading"
+import { FC, useEffect, useRef, useState } from "react"
+import { Loading } from "./components/loading"
 import { HexColors } from "./lib/colors"
-import Dialog from "./components/Dialog"
-import Container from "./components/Container"
-
-enum DialogAlignment {
-    START = "self-start",
-    END = "self-end"
-}
+import { DialogBox } from "./components/dialog_box"
+import { Box } from "./components/box"
+import { ChatBox } from "./components/chat_box"
+import { DialogText } from "./components/dialog_text"
 
 interface DialogItem {
     text: string
-    alignment: DialogAlignment
+    label?: string
+    className?: string
 }
 
-export default function App() {
-    const [error, setError] = useState<string>("")
-    const [blob, setBlob] = useState<Blob | null>(null)
-    const [answerLoading, setAnswerLoading] = useState<boolean>(false)
+export const App: FC = () => {
+    const [prompt, setPrompt] = useState<string>("")
     const [promptLoading, setPromptLoading] = useState<boolean>(false)
+    const [answerLoading, setAnswerLoading] = useState<boolean>(false)
     const [dialogs, setDialogs] = useState<DialogItem[]>([])
 
-    // Create a ref for the Container to control its scrolling
     const containerRef = useRef<HTMLDivElement>(null)
-    // Auto-scroll the Container to the bottom when new dialogs or loading states update
+
     useEffect(() => {
         if (containerRef.current) {
             containerRef.current.scrollTop = containerRef.current.scrollHeight
         }
     }, [dialogs, promptLoading, answerLoading])
 
-    function createDialogElement(dialog: DialogItem) {
-        return (
-            <Dialog
-                key={crypto.randomUUID()}
-                className={dialog.alignment}
-            >
-                {dialog.text}
-            </Dialog>
-        )
-    }
-
     async function handlePrompt(): Promise<void> {
-        try {
-            if (!blob) return
-            setPromptLoading(true)
-            const res = await requestAudioTranscription(blob)
-            setDialogs(prev => [...prev, {text: res.transcription, alignment: DialogAlignment.END}])
-            setPromptLoading(false)
-            await handleAnswer()
-        } catch (err: any) {
-            const errorMessage = err?.message || "Something went wrong..."
-            setDialogs(prev => [...prev, {text: errorMessage, alignment: DialogAlignment.END}])
-        } finally {
-            setPromptLoading(false)
-        }
+        if (!prompt.trim()) return
+        setPromptLoading(true)
+
+        const newDialog: DialogItem = { text: prompt, label: "Me", className: "bg-gray-700 text-white" }
+        setDialogs(prev => [...prev, newDialog])
+        setPrompt("")
+
+        setPromptLoading(false)
+        handleAnswer()
     }
 
     async function handleAnswer(): Promise<void> {
-        try {
-            if (!prompt) return
-            setAnswerLoading(true)
-            // Simulate wait time
-            await new Promise(resolve => setTimeout(resolve, 1000))
-            setDialogs(prev => [...prev, {text: "...", alignment: DialogAlignment.START}])
-        } catch (err: any) {
-            const errorMessage = err?.message || "Something went wrong..."
-            setDialogs(prev => [...prev, {text: errorMessage, alignment: DialogAlignment.START}])
-        } finally {
+        setAnswerLoading(true)
+
+        // Simulate...
+        setTimeout(() => {
+            const answer: DialogItem = { text: "This is a simulated response.", label: "Best friend" }
+            setDialogs(prev => [...prev, answer])
             setAnswerLoading(false)
-        }
+        }, 1000)
     }
 
-    useEffect(() => void handlePrompt(), [blob])
-
     return (
-        <div className="max-w-lg h-screen p-2 mx-auto flex flex-col items-center justify-center space-y-4">
-            <Container ref={containerRef} className="max-h-screen flex-1 flex flex-col space-y-4">
-                {dialogs.map(createDialogElement)}
-                {promptLoading && <Dialog className={DialogAlignment.END}><Loading color={HexColors.RED} /></Dialog>}
-                {answerLoading && <Dialog className={DialogAlignment.START}><Loading color={HexColors.RED} /></Dialog>}
-                <AudioRecorder
-                    disabled={(promptLoading || answerLoading)}
-                    onChange={setBlob}
-                    onError={setError}
-                    className="mx-auto"
-                />
-            </Container>
+        <div className="max-w-lg h-screen p-4 mx-auto flex flex-col space-y-2">
+            <Box ref={containerRef} className="max-h-screen flex-1 flex flex-col gap-y-2 overflow-y-auto">
+                {dialogs.map((dialog, index) => (
+                    <DialogBox key={index} label={dialog.label} className={dialog.className}>
+                        <DialogText text={dialog.text} />
+                    </DialogBox>
+                ))}
+                {promptLoading && <DialogBox><Loading color={HexColors.RED} /></DialogBox>}
+                {answerLoading && <DialogBox><Loading color={HexColors.RED} /></DialogBox>}
+            </Box>
+            <ChatBox value={prompt} onChange={setPrompt} onSubmit={handlePrompt} />
         </div>
     )
 }

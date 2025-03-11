@@ -1,3 +1,4 @@
+import { FC } from "react"
 import { HexColors } from "../lib/colors"
 
 interface LoadingProps {
@@ -5,7 +6,7 @@ interface LoadingProps {
     size?: number
 }
 
-export default function Loading({ color, size = 24 }: LoadingProps) {
+export const Loading: FC<LoadingProps> = ({ color, size = 24 }) => {
     // Render an SVG spinner that rotates using Tailwind's animate-spin class
     return (
         <svg

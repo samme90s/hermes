@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
-import AudioButton from "./AudioButton"
+import { FC, useEffect, useState } from "react"
+import { AudioButton } from "./audio_button"
 
 interface AudioRecorderProps {
     onChange: (audioBlob: Blob) => void
@@ -8,7 +8,7 @@ interface AudioRecorderProps {
     className?: string
 }
 
-export default function AudioRecorder({ onChange, disabled, onError, className }: AudioRecorderProps) {
+export const AudioRecorder: FC<AudioRecorderProps> = ({ onChange, onError, disabled, className }) => {
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
     const [recording, setRecording] = useState<boolean>(false)
 
