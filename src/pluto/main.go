@@ -41,12 +41,10 @@ type ChatResponse struct {
 
 // Global configuration variables populated from the environment.
 var (
-	port      string
-	orSecret  string
-	orUri     string
-	orModel   string
-	orTitle   string
-	orReferer string
+	port     string
+	orSecret string
+	orUri    string
+	orModel  string
 )
 
 // respondWithError sends a JSON-formatted error response with a given HTTP status code.
@@ -68,8 +66,6 @@ func main() {
 	orSecret = os.Getenv("OR_SECRET")
 	orUri = os.Getenv("OR_URI")
 	orModel = os.Getenv("OR_MODEL")
-	orTitle = os.Getenv("OR_TITLE")
-	orReferer = os.Getenv("OR_REFERER")
 
 	// Check for missing, non-optional environment variables.
 	if port == "" {
@@ -154,12 +150,6 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 	// Set necessary headers.
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+orSecret)
-	if orReferer != "" {
-		req.Header.Set("HTTP-Referer", orReferer)
-	}
-	if orTitle != "" {
-		req.Header.Set("X-Title", orTitle)
-	}
 
 	// Send the request to OpenRouter.
 	client := &http.Client{}
