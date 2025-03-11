@@ -5,7 +5,7 @@ import (
 	"bytes"         // To create a buffer for our JSON payload
 	"encoding/json" // To marshal/unmarshal JSON data
 	"fmt"           // For formatted I/O
-	"io/ioutil"     // To read the HTTP response body
+	"io"            // To read the HTTP response body
 	"log"           // For logging errors and informational messages
 	"net/http"      // For building the HTTP server and making HTTP requests
 	"os"            // For accessing environment variables
@@ -97,96 +97,96 @@ func main() {
 
 // chatHandler acts as a proxy to the OpenRouter API.
 func chatHandler(w http.ResponseWriter, r *http.Request) {
-    // Only allow POST requests.
-    if r.Method != http.MethodPost {
-        respondWithError(w, http.StatusMethodNotAllowed,
-            "Invalid method. Only POST requests are allowed. Please use POST and include a valid JSON payload.")
-        return
-    }
+	// Only allow POST requests.
+	if r.Method != http.MethodPost {
+		respondWithError(w, http.StatusMethodNotAllowed,
+			"Invalid method. Only POST requests are allowed. Please use POST and include a valid JSON payload.")
+		return
+	}
 
-    // Read the client JSON payload.
-    clientPayload, err := ioutil.ReadAll(r.Body)
-    if err != nil {
-        respondWithError(w, http.StatusBadRequest,
-            "Unable to read the request body. Please ensure you're sending a proper JSON payload.")
-        return
-    }
-    defer r.Body.Close()
+	// Read the client JSON payload.
+	clientPayload, err := io.ReadAll(r.Body)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest,
+			"Unable to read the request body. Please ensure you're sending a proper JSON payload.")
+		return
+	}
+	defer r.Body.Close()
 
-    // Unmarshal the client payload into a structure that excludes the model field.
-    var clientReq ClientChatRequest
-    if err := json.Unmarshal(clientPayload, &clientReq); err != nil {
-        respondWithError(w, http.StatusBadRequest,
-            "Invalid JSON payload. Expected format: { \"messages\": [{ \"role\": \"user\", \"content\": \"your message\" }] }")
-        return
-    }
+	// Unmarshal the client payload into a structure that excludes the model field.
+	var clientReq ClientChatRequest
+	if err := json.Unmarshal(clientPayload, &clientReq); err != nil {
+		respondWithError(w, http.StatusBadRequest,
+			"Invalid JSON payload. Expected format: { \"messages\": [{ \"role\": \"user\", \"content\": \"your message\" }] }")
+		return
+	}
 
-    // Validate that the messages field contains data.
-    if len(clientReq.Messages) == 0 {
-        respondWithError(w, http.StatusBadRequest,
-            "Invalid JSON payload. Please provide at least one message in the 'messages' field.")
-        return
-    }
+	// Validate that the messages field contains data.
+	if len(clientReq.Messages) == 0 {
+		respondWithError(w, http.StatusBadRequest,
+			"Invalid JSON payload. Please provide at least one message in the 'messages' field.")
+		return
+	}
 
-    // Build the final ChatRequest, using orModel from the environment.
-    chatReq := ChatRequest{
-        Model:    orModel,
-        Messages: clientReq.Messages,
-    }
-    log.Printf("ChatRequest: %+v", chatReq)
+	// Build the final ChatRequest, using orModel from the environment.
+	chatReq := ChatRequest{
+		Model:    orModel,
+		Messages: clientReq.Messages,
+	}
+	log.Printf("ChatRequest: %+v", chatReq)
 
-    // Marshal the ChatRequest into JSON for the OpenRouter API.
-    jsonData, err := json.Marshal(chatReq)
-    if err != nil {
-        respondWithError(w, http.StatusInternalServerError,
-            "Error creating JSON payload. Please try again later.")
-        return
-    }
+	// Marshal the ChatRequest into JSON for the OpenRouter API.
+	jsonData, err := json.Marshal(chatReq)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError,
+			"Error creating JSON payload. Please try again later.")
+		return
+	}
 
-    // Create a new HTTP POST request to OpenRouter.
-    req, err := http.NewRequest("POST", orUri, bytes.NewBuffer(jsonData))
-    if err != nil {
-        respondWithError(w, http.StatusInternalServerError,
-            "Error creating request to OpenRouter. Please try again later.")
-        return
-    }
+	// Create a new HTTP POST request to OpenRouter.
+	req, err := http.NewRequest("POST", orUri, bytes.NewBuffer(jsonData))
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError,
+			"Error creating request to OpenRouter. Please try again later.")
+		return
+	}
 
-    // Set necessary headers.
-    req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("Authorization", "Bearer "+orSecret)
-    if orReferer != "" {
-        req.Header.Set("HTTP-Referer", orReferer)
-    }
-    if orTitle != "" {
-        req.Header.Set("X-Title", orTitle)
-    }
+	// Set necessary headers.
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+orSecret)
+	if orReferer != "" {
+		req.Header.Set("HTTP-Referer", orReferer)
+	}
+	if orTitle != "" {
+		req.Header.Set("X-Title", orTitle)
+	}
 
-    // Send the request to OpenRouter.
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        respondWithError(w, http.StatusInternalServerError,
-            "Error communicating with OpenRouter. Please try again later.")
-        log.Printf("Error sending request: %v", err)
-        return
-    }
-    defer resp.Body.Close()
+	// Send the request to OpenRouter.
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError,
+			"Error communicating with OpenRouter. Please try again later.")
+		log.Printf("Error sending request: %v", err)
+		return
+	}
+	defer resp.Body.Close()
 
-    // Read the OpenRouter API response.
-    respBody, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        respondWithError(w, http.StatusInternalServerError,
-            "Error reading response from OpenRouter. Please try again later.")
-        return
-    }
+	// Read the OpenRouter API response.
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError,
+			"Error reading response from OpenRouter. Please try again later.")
+		return
+	}
 
-    // Log the status from OpenRouter for debugging.
-    log.Printf("OpenRouter responded with status: %d", resp.StatusCode)
+	// Log the status from OpenRouter for debugging.
+	log.Printf("OpenRouter responded with status: %d", resp.StatusCode)
 
-    // Forward the OpenRouter response, including its status code and JSON body, to the client.
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(resp.StatusCode)
-    if _, err := w.Write(respBody); err != nil {
-        log.Printf("Error writing response to client: %v", err)
-    }
+	// Forward the OpenRouter response, including its status code and JSON body, to the client.
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	if _, err := w.Write(respBody); err != nil {
+		log.Printf("Error writing response to client: %v", err)
+	}
 }
