@@ -17,6 +17,26 @@ efficient, low-latency speech-to-text processing.
 
 ## Development
 
+### GoLang
+
+Go is a statically typed, compiled language that is designed for simplicity and
+efficiency. It is a great language for building web servers and APIs.
+
+This project uses [Go](https://golang.org/). Make sure to have it installed
+before running the project.
+
+### Usage
+
+```shell
+# Run the server
+cd src/pluto/ && go run main.go
+```
+
+```shell
+# Build the server
+cd src/pluto/ && go build
+```
+
 ### Bun
 
 Bun is similar to Node, but it is written in Rust and is much faster.
