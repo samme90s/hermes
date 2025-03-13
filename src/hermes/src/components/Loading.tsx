@@ -1,8 +1,16 @@
 import { FC } from "react"
-import { HexColors } from "../lib/colors"
+
+export enum Hex {
+    BLACK = "#000000",
+    BLUE = "#3b82f6",
+    GREEN = "#10b981",
+    RED = "#ef4444",
+    WHITE = "#ffffff",
+    YELLOW = "#f59e0b",
+}
 
 interface LoadingProps {
-    color: HexColors
+    color: Hex
     size?: number
     className?: string
 }

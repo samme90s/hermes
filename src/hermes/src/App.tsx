@@ -1,11 +1,12 @@
 import { FC, useEffect, useRef, useState } from "react"
-import { Loading } from "./components/loading"
-import { HexColors } from "./lib/colors"
+import { useMutation } from "@tanstack/react-query"
+import { Loading, Hex } from "./components/loading"
 import { DialogBox } from "./components/dialog_box"
 import { Box } from "./components/box"
 import { ChatBox } from "./components/chat_box"
 import { AudioRecorder } from "./components/audio_recorder"
 import { ToggleInput } from "./components/toggle_input"
+import { chat, ChatResponse } from "./services/gateway"
 
 interface DialogItem {
     text: string
@@ -16,16 +17,9 @@ export const App: FC = () => {
     const [isAudioMode, setIsAudioMode] = useState<boolean>(false)
     const [prompt, setPrompt] = useState<string>("")
     const [promptLoading, setPromptLoading] = useState<boolean>(false)
-    const [answerLoading, setAnswerLoading] = useState<boolean>(false)
     const [dialogs, setDialogs] = useState<DialogItem[]>([])
 
     const containerRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        if (containerRef.current) {
-            containerRef.current.scrollTop = containerRef.current.scrollHeight
-        }
-    }, [isAudioMode, prompt, promptLoading, answerLoading, dialogs])
 
     const toggleMode = (): void => setIsAudioMode(prev => !prev)
 
@@ -38,19 +32,30 @@ export const App: FC = () => {
         setPrompt("")
 
         setPromptLoading(false)
-        handleAnswer()
+
+        // Trigger the answer mutation
+        answerMutation.mutate(prompt)
     }
 
-    const handleAnswer = async (): Promise<void> => {
-        setAnswerLoading(true)
+    const answerMutation = useMutation<ChatResponse, Error, string>(
+        {
+            mutationFn: (prompt) => chat(prompt),
+            onSuccess: (data) => {
+                const newDialog: DialogItem = { text: data.choices[0].message.content, label: "Best friend" }
+                setDialogs(prev => [...prev, newDialog])
+            },
+            onError: (error) => {
+                console.error(error)
+            }
+        }
+    )
 
-        // Simulate...
-        setTimeout(() => {
-            const answer: DialogItem = { text: "This is a simulated response.", label: "Best friend" }
-            setDialogs(prev => [...prev, answer])
-            setAnswerLoading(false)
-        }, 1000)
-    }
+    // TODO: Fix scrolling when mutation is pending and resolves
+    useEffect(() => {
+        if (containerRef.current) {
+            containerRef.current.scrollTop = containerRef.current.scrollHeight
+        }
+    }, [isAudioMode, prompt, promptLoading, dialogs])
 
     return (
         <div className="max-w-lg h-screen p-4 mx-auto flex flex-col space-y-2">
@@ -61,7 +66,7 @@ export const App: FC = () => {
                 {dialogs.map((dialog, index) => (
                     <DialogBox key={index} text={dialog.text} label={dialog.label} />
                 ))}
-                {(promptLoading || answerLoading) && <Loading color={HexColors.RED} />}
+                {(promptLoading || answerMutation.isPending) && <Loading color={Hex.BLUE} />}
 
                 {/* Input area */}
                 <div className="mt-auto relative">
