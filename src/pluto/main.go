@@ -2,41 +2,33 @@
 package main
 
 import (
-	"bytes"         // To create a buffer for our JSON payload
-	"encoding/json" // To marshal/unmarshal JSON data
-	"fmt"           // For formatted I/O
-	"io"            // To read the HTTP response body
-	"log"           // For logging errors and informational messages
-	"net/http"      // For building the HTTP server and making HTTP requests
-	"os"            // For accessing environment variables
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
 
-	"github.com/joho/godotenv" // Import godotenv for loading .env files
+	"github.com/joho/godotenv"
 )
 
 // Message represents a single chat message.
+// This is tied to the ChatRequest struct.
 type Message struct {
-	Role    string `json:"role"`    // "user" or "assistant"
-	Content string `json:"content"` // The text content of the message
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
-// ChatRequest represents the final payload sent to OpenRouter.
-// The "Model" field will always be set from the environment variable.
+// ChatRequest represents the payload sent to OpenRouter.
 type ChatRequest struct {
-	Model    string    `json:"model"`    // The model id from OpenRouter
-	Messages []Message `json:"messages"` // Chat history/messages
-}
-
-// ClientChatRequest is used only to unmarshal the client input,
-// and deliberately does NOT include the model field.
-type ClientChatRequest struct {
+	Model    string    `json:"model"`
 	Messages []Message `json:"messages"`
 }
 
-// ChatResponse represents the expected structure of the OpenRouter response.
-type ChatResponse struct {
-	Choices []struct {
-		Message Message `json:"message"`
-	} `json:"choices"`
+// SimpleChatRequest represents the payload sent by the client.
+type SimpleChatRequest struct {
+	Content string `json:"content"`
 }
 
 // Global configuration variables populated from the environment.
@@ -56,28 +48,25 @@ func respondWithError(w http.ResponseWriter, code int, message string) {
 }
 
 func main() {
-	// LOCAL DEVELOPMENT
-	if err := godotenv.Load(); err != nil {
-		log.Printf("Warning: could not load environment file %v", err)
-	}
+	godotenv.Load("./.env")
 
-	// Retrieve required environment variables.
 	port = os.Getenv("PORT")
-	orSecret = os.Getenv("OR_SECRET")
-	orUri = os.Getenv("OR_URI")
-	orModel = os.Getenv("OR_MODEL")
-
-	// Check for missing, non-optional environment variables.
-	if port == "" {
+	if len(port) == 0 {
 		log.Fatal("PORT is required")
 	}
-	if orSecret == "" {
+
+	orSecret = os.Getenv("OR_SECRET")
+	if len(orSecret) == 0 {
 		log.Fatal("OR_SECRET is required")
 	}
-	if orUri == "" {
+
+	orUri = os.Getenv("OR_URI")
+	if len(orUri) == 0 {
 		log.Fatal("OR_URI is required")
 	}
-	if orModel == "" {
+
+	orModel = os.Getenv("OR_MODEL")
+	if len(orModel) == 0 {
 		log.Fatal("OR_MODEL is required")
 	}
 
@@ -85,8 +74,9 @@ func main() {
 	http.HandleFunc("/api/chat", chatHandler)
 
 	// Start the HTTP server.
-	fmt.Println("API Gateway is running on port: " + port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	addr := ":" + port
+	fmt.Printf("API Gateway is running at http://localhost%s\n", addr)
+	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
 }
@@ -95,52 +85,65 @@ func main() {
 func chatHandler(w http.ResponseWriter, r *http.Request) {
 	// Only allow POST requests.
 	if r.Method != http.MethodPost {
-		respondWithError(w, http.StatusMethodNotAllowed,
-			"Invalid method. Only POST requests are allowed. Please use POST and include a valid JSON payload.")
+		respondWithError(
+			w,
+			http.StatusMethodNotAllowed,
+			"Invalid method. Only POST requests are allowed. Please include a valid JSON payload.",
+		)
 		return
 	}
 
-	// Read the client JSON payload.
-	clientPayload, err := io.ReadAll(r.Body)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest,
-			"Unable to read the request body. Please ensure you're sending a proper JSON payload.")
+	// Create a JSON decoder and disallow unknown fields.
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+
+	// Decode the client's JSON payload into a SimpleChatRequest.
+	var simpleReq SimpleChatRequest
+	if err := decoder.Decode(&simpleReq); err != nil {
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			"Invalid JSON payload. Expected **only** the 'content' field, e.g. { \"content\": \"your message\" }.",
+		)
 		return
 	}
 	defer r.Body.Close()
 
-	// Unmarshal the client payload into a structure that excludes the model field.
-	var clientReq ClientChatRequest
-	if err := json.Unmarshal(clientPayload, &clientReq); err != nil {
-		respondWithError(w, http.StatusBadRequest,
-			"Invalid JSON payload. Expected format: { \"messages\": [{ \"role\": \"user\", \"content\": \"your message\" }] }")
+	// Validate that the content field is provided.
+	if len(simpleReq.Content) == 0 {
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			"Invalid JSON payload. Please provide the 'content' field with your message.",
+		)
 		return
 	}
 
-	// Validate that the messages field contains data.
-	if len(clientReq.Messages) == 0 {
-		respondWithError(w, http.StatusBadRequest,
-			"Invalid JSON payload. Please provide at least one message in the 'messages' field.")
-		return
-	}
-
-	// Build the final ChatRequest, using orModel from the environment.
+	// Build the ChatRequest payload for OpenRouter.
 	chatReq := ChatRequest{
-		Model:    orModel,
-		Messages: clientReq.Messages,
+		Model: orModel,
+		Messages: []Message{
+			{
+				Role:    "user",
+				Content: simpleReq.Content,
+			},
+		},
 	}
 	log.Printf("ChatRequest: %+v", chatReq)
 
 	// Marshal the ChatRequest into JSON for the OpenRouter API.
-	jsonData, err := json.Marshal(chatReq)
+	chatReqJSON, err := json.Marshal(chatReq)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError,
-			"Error creating JSON payload. Please try again later.")
+		respondWithError(
+			w,
+			http.StatusInternalServerError,
+			"Error creating JSON payload. Please try again later.",
+		)
 		return
 	}
 
-	// Create a new HTTP POST request to OpenRouter.
-	req, err := http.NewRequest("POST", orUri, bytes.NewBuffer(jsonData))
+	// Create a new HTTP request to OpenRouter.
+	req, err := http.NewRequest("POST", orUri, bytes.NewBuffer(chatReqJSON))
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError,
 			"Error creating request to OpenRouter. Please try again later.")
@@ -155,8 +158,11 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError,
-			"Error communicating with OpenRouter. Please try again later.")
+		respondWithError(
+			w,
+			http.StatusInternalServerError,
+			"Error communicating with OpenRouter. Please try again later.",
+		)
 		log.Printf("Error sending request: %v", err)
 		return
 	}
@@ -165,15 +171,18 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 	// Read the OpenRouter API response.
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError,
-			"Error reading response from OpenRouter. Please try again later.")
+		respondWithError(
+			w,
+			http.StatusInternalServerError,
+			"Error reading response from OpenRouter. Please try again later.",
+		)
 		return
 	}
 
 	// Log the status from OpenRouter for debugging.
 	log.Printf("OpenRouter responded with status: %d", resp.StatusCode)
 
-	// Forward the OpenRouter response, including its status code and JSON body, to the client.
+	// Forward the OpenRouter response to the client.
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(resp.StatusCode)
 	if _, err := w.Write(respBody); err != nil {
