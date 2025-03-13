@@ -4,15 +4,16 @@ import { HexColors } from "./lib/colors"
 import { DialogBox } from "./components/dialog_box"
 import { Box } from "./components/box"
 import { ChatBox } from "./components/chat_box"
-import { DialogText } from "./components/dialog_text"
+import { AudioRecorder } from "./components/audio_recorder"
+import { ToggleInput } from "./components/toggle_input"
 
 interface DialogItem {
     text: string
     label?: string
-    className?: string
 }
 
 export const App: FC = () => {
+    const [isAudioMode, setIsAudioMode] = useState<boolean>(false)
     const [prompt, setPrompt] = useState<string>("")
     const [promptLoading, setPromptLoading] = useState<boolean>(false)
     const [answerLoading, setAnswerLoading] = useState<boolean>(false)
@@ -24,13 +25,15 @@ export const App: FC = () => {
         if (containerRef.current) {
             containerRef.current.scrollTop = containerRef.current.scrollHeight
         }
-    }, [dialogs, promptLoading, answerLoading])
+    }, [isAudioMode, prompt, promptLoading, answerLoading, dialogs])
 
-    async function handlePrompt(): Promise<void> {
+    const toggleMode = (): void => setIsAudioMode(prev => !prev)
+
+    const handlePrompt = async (): Promise<void> => {
         if (!prompt.trim()) return
         setPromptLoading(true)
 
-        const newDialog: DialogItem = { text: prompt, label: "Me", className: "bg-gray-700 text-white" }
+        const newDialog: DialogItem = { text: prompt, label: "Me" }
         setDialogs(prev => [...prev, newDialog])
         setPrompt("")
 
@@ -38,7 +41,7 @@ export const App: FC = () => {
         handleAnswer()
     }
 
-    async function handleAnswer(): Promise<void> {
+    const handleAnswer = async (): Promise<void> => {
         setAnswerLoading(true)
 
         // Simulate...
@@ -51,16 +54,24 @@ export const App: FC = () => {
 
     return (
         <div className="max-w-lg h-screen p-4 mx-auto flex flex-col space-y-2">
-            <Box ref={containerRef} className="max-h-screen flex-1 flex flex-col gap-y-2 overflow-y-auto">
+            <Box
+                ref={containerRef}
+                className="max-h-screen flex-1 flex flex-col gap-y-2 overflow-y-auto"
+            >
                 {dialogs.map((dialog, index) => (
-                    <DialogBox key={index} label={dialog.label} className={dialog.className}>
-                        <DialogText text={dialog.text} />
-                    </DialogBox>
+                    <DialogBox key={index} text={dialog.text} label={dialog.label} />
                 ))}
-                {promptLoading && <DialogBox><Loading color={HexColors.RED} /></DialogBox>}
-                {answerLoading && <DialogBox><Loading color={HexColors.RED} /></DialogBox>}
+                {(promptLoading || answerLoading) && <Loading color={HexColors.RED} />}
+
+                {/* Input area */}
+                <div className="mt-auto relative">
+                    {isAudioMode
+                        ? <AudioRecorder onChange={() => null} onError={() => null} className="h-16 w-full" />
+                        : <ChatBox value={prompt} onChange={setPrompt} onSubmit={handlePrompt} />
+                    }
+                    <ToggleInput onSwitch={toggleMode} toggled={isAudioMode} className="absolute right-1 bottom-1" />
+                </div>
             </Box>
-            <ChatBox value={prompt} onChange={setPrompt} onSubmit={handlePrompt} />
-        </div>
+        </div >
     )
 }

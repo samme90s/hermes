@@ -76,6 +76,11 @@ export const AudioRecorder: FC<AudioRecorderProps> = ({ onChange, onError, disab
     }
 
     return (
-        <AudioButton disabled={disabled} pulse={recording} onClick={toggleRecording} className={className}></AudioButton>
+        <AudioButton
+            onClick={toggleRecording}
+            disabled={disabled}
+            pulse={recording}
+            className={className}
+        />
     )
 }
