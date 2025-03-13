@@ -14,16 +14,8 @@ body {
 
 .markdown-content pre {
     white-space: pre-wrap !important;
-    /* Preserve formatting but allow wrapping */
     word-wrap: break-word !important;
-    /* Wrap long words */
     overflow-wrap: break-word !important;
-    overflow-x: auto;
-    /* Allow horizontal scrolling if necessary */
-    padding: 8px;
-    background-color: #f3f3f3;
-    /* Light gray background */
-    border-radius: 4px;
 }
 
 .markdown-content code {
