@@ -1,5 +1,5 @@
 import { Mic, MicOff } from "lucide-react"
-import { FC, useState, useEffect } from "react"
+import { FC, useState, useEffect, useRef } from "react"
 import { cn } from "../lib/utils"
 
 interface RecordButtonProps {
@@ -9,12 +9,12 @@ interface RecordButtonProps {
 }
 
 export const RecordButton: FC<RecordButtonProps> = ({ onChange, disabled = false, className }) => {
-    const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
-    const [isRecording, setIsRecording] = useState<boolean>(false)
-    const [isDisabled, setDisabled] = useState<boolean>(disabled)
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+    const [isRecording, setIsRecording] = useState(false)
+    const [isDisabled, setDisabled] = useState(disabled)
 
     useEffect(() => void setupMediaRecorder(), [])
-    useEffect(() => setDisabled(disabled || !mediaRecorder), [disabled, mediaRecorder])
+    useEffect(() => setDisabled(disabled || !mediaRecorderRef.current), [disabled])
 
     async function setupMediaRecorder(): Promise<void> {
         try {
@@ -31,51 +31,44 @@ export const RecordButton: FC<RecordButtonProps> = ({ onChange, disabled = false
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
             const mediaRecorder = new MediaRecorder(stream, { mimeType: mime })
 
-            // Callbacks
             let audioChunks: Blob[] = []
             mediaRecorder.ondataavailable = (event) => {
-                // Return if no data
-                if (!event?.data || event.data.size <= 0) {
-                    return
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data)
                 }
-                audioChunks.push(event.data)
             }
-            mediaRecorder.onstop = async () => {
-                // Return if no chunks are present
-                if (audioChunks.length <= 0) {
-                    return
+            mediaRecorder.onstop = () => {
+                if (audioChunks.length > 0) {
+                    const audioBlob = new Blob(audioChunks, { type: mime })
+                    onChange(audioBlob)
                 }
-
-                const audioBlob = new Blob(audioChunks, { type: mime })
-                onChange(audioBlob)
-
-                // Reset chunks for the next recording session
-                audioChunks = []
+                audioChunks = []  // Clear chunks for the next session
             }
 
-            setMediaRecorder(mediaRecorder)
+            mediaRecorderRef.current = mediaRecorder  // Store in ref
+            setDisabled(disabled || !mediaRecorder)
         } catch (err) {
             console.error(`Recording error: ${err}`)
         }
     }
 
     function record(): void {
-        if (!mediaRecorder) {
+        if (!mediaRecorderRef.current) {
             console.error("MediaRecorder not set")
             return
         }
 
-        mediaRecorder.start()
+        mediaRecorderRef.current.start()
         setIsRecording(true)
     }
 
     function stopRecording(): void {
-        if (!mediaRecorder) {
+        if (!mediaRecorderRef.current) {
             console.error("MediaRecorder not set")
             return
         }
 
-        mediaRecorder.stop()
+        mediaRecorderRef.current.stop()
         setIsRecording(false)
     }
 
@@ -93,16 +86,15 @@ export const RecordButton: FC<RecordButtonProps> = ({ onChange, disabled = false
                             : "text-blue-600",
                     className
                 )}
-            title={isRecording ? "Stop" : "Read"}
+            title={isRecording ? "Stop" : "Record"}
         >
             {
                 isDisabled
-                    ? <MicOff className="h-6 w-6 opacity-50" /> // Disabled
+                    ? <MicOff className="h-6 w-6 opacity-50" />  // Disabled
                     : isRecording
-                        ? <Mic className="h-6 w-6" /> // Reading
-                        : <Mic className="h-6 w-6" /> // Idle
+                        ? <Mic className="h-6 w-6" />  // Recording
+                        : <Mic className="h-6 w-6" />  // Idle
             }
-        </button >
+        </button>
     )
 }
-
