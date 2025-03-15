@@ -1,0 +1,25 @@
+/* VERSION 4 */
+@import "tailwindcss";
+
+@theme {
+    /* https://tailwindcss.com/docs/box-shadow */
+    /* shadow-(<custom-property>) | box-shadow: var(<custom-property>); */
+    --shadow-border-red: 0 0 2rem 1rem rgba(255, 0, 0, 0.4);
+}
+
+html,
+body {
+    background-color: black;
+}
+
+.markdown-content pre {
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+.markdown-content code {
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}

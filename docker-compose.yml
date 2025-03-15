@@ -1,24 +1,27 @@
 services:
-  app:
-    container_name: app
+  hermes:
+    container_name: hermes
     build:
-      context: ./client/
+      context: ./src/hermes/
       dockerfile: Dockerfile
     networks:
       - net
     ports:
-      - 80:80
+      - "80:80"
 
-  mercury:
-    container_name: mercury
+  pluto:
+    container_name: pluto
     build:
-      context: ./mercury/
+      context: ./src/pluto/
       dockerfile: Dockerfile
     networks:
       - net
-    ports:
-      - 8000:8000
+    env_file:
+      - ./src/pluto/.env
+    # No ports mapping here—pluto is available only within the Docker network.
 
 networks:
   net:
     name: net
+    # Optionally, add internal: true if you want to restrict network access further:
+    # internal: true

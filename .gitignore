@@ -1,0 +1,17 @@
+# Logging
+**/*logs/
+
+# Client
+**/*node_modules/
+**/*vite/
+**/*dist/
+
+# Environment
+**/env
+**/.env
+
+# GoLang
+**/pluto/pluto.exe
+
+# Windows
+**/*.exe
