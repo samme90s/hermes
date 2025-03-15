@@ -20,7 +20,7 @@ export const App: FC = () => {
     const answerMutation = useMutation<ChatResponse, Error, string>(
         {
             mutationFn: (prompt) => chat(prompt),
-            onSuccess: (data) => setCurrentText(data.choices[0].message.content),
+            onSuccess: (data) => setCurrentText(data.message),
             onError: (error) => console.error(error)
         }
     )

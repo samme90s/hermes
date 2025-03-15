@@ -1,26 +1,5 @@
 export interface ChatResponse {
-    id: string
-    provider: string
-    model: string
-    object: string
-    created: number
-    choices: Array<{
-        logprobs: any
-        finish_reason: string
-        native_finish_reason: string
-        index: number
-        message: {
-            role: string
-            content: string
-            refusal: any
-            reasoning: string
-        }
-    }>
-    usage: {
-        prompt_tokens: number
-        completion_tokens: number
-        total_tokens: number
-    }
+    message: string
 }
 
 export const chat = async (message: string): Promise<ChatResponse> => {

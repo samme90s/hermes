@@ -2,33 +2,22 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/joho/godotenv"
 )
-
-// Message represents a single chat message.
-// This is tied to the ChatRequest struct.
-type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
-// ChatRequest represents the payload sent to OpenRouter.
-type ChatRequest struct {
-	Model    string    `json:"model"`
-	Messages []Message `json:"messages"`
-}
 
 // SimpleChatRequest represents the payload sent by the client.
 type SimpleChatRequest struct {
 	Content string `json:"content"`
+}
+
+// SimpleChatResponse represents the structured response returned by the API.
+type SimpleChatResponse struct {
+	Message string `json:"message"`
 }
 
 // Global configuration variables populated from the environment.
@@ -53,21 +42,6 @@ func main() {
 	port = os.Getenv("PORT")
 	if len(port) == 0 {
 		log.Fatal("PORT is required")
-	}
-
-	orSecret = os.Getenv("OR_SECRET")
-	if len(orSecret) == 0 {
-		log.Fatal("OR_SECRET is required")
-	}
-
-	orUri = os.Getenv("OR_URI")
-	if len(orUri) == 0 {
-		log.Fatal("OR_URI is required")
-	}
-
-	orModel = os.Getenv("OR_MODEL")
-	if len(orModel) == 0 {
-		log.Fatal("OR_MODEL is required")
 	}
 
 	// Set up the HTTP handler for the API gateway.
@@ -119,73 +93,14 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Build the ChatRequest payload for OpenRouter.
-	chatReq := ChatRequest{
-		Model: orModel,
-		Messages: []Message{
-			{
-				Role:    "user",
-				Content: simpleReq.Content,
-			},
-		},
+	// Create a structured response
+	response := SimpleChatResponse{
+		Message: "hello world ... " + simpleReq.Content,
 	}
-	log.Printf("ChatRequest: %+v", chatReq)
-
-	// Marshal the ChatRequest into JSON for the OpenRouter API.
-	chatReqJSON, err := json.Marshal(chatReq)
-	if err != nil {
-		respondWithError(
-			w,
-			http.StatusInternalServerError,
-			"Error creating JSON payload. Please try again later.",
-		)
-		return
-	}
-
-	// Create a new HTTP request to OpenRouter.
-	req, err := http.NewRequest("POST", orUri, bytes.NewBuffer(chatReqJSON))
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError,
-			"Error creating request to OpenRouter. Please try again later.")
-		return
-	}
-
-	// Set necessary headers.
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+orSecret)
-
-	// Send the request to OpenRouter.
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		respondWithError(
-			w,
-			http.StatusInternalServerError,
-			"Error communicating with OpenRouter. Please try again later.",
-		)
-		log.Printf("Error sending request: %v", err)
-		return
-	}
-	defer resp.Body.Close()
-
-	// Read the OpenRouter API response.
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		respondWithError(
-			w,
-			http.StatusInternalServerError,
-			"Error reading response from OpenRouter. Please try again later.",
-		)
-		return
-	}
-
-	// Log the status from OpenRouter for debugging.
-	log.Printf("OpenRouter responded with status: %d", resp.StatusCode)
-
-	// Forward the OpenRouter response to the client.
+	// Mock response to the client.
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(resp.StatusCode)
-	if _, err := w.Write(respBody); err != nil {
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("Error writing response to client: %v", err)
 	}
 }
