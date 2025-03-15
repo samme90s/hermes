@@ -1,17 +1,20 @@
-import { FC, useEffect, useState } from "react"
-import { AudioButton } from "./audio_button"
+import { Mic, MicOff } from "lucide-react"
+import { FC, useState, useEffect } from "react"
+import { cn } from "../lib/utils"
 
-interface AudioRecorderProps {
+interface RecordButtonProps {
     onChange: (audioBlob: Blob) => void
     disabled?: boolean
     className?: string
 }
 
-export const AudioRecorder: FC<AudioRecorderProps> = ({ onChange, disabled, className }) => {
+export const RecordButton: FC<RecordButtonProps> = ({ onChange, disabled = false, className }) => {
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
-    const [recording, setRecording] = useState<boolean>(false)
+    const [isRecording, setIsRecording] = useState<boolean>(false)
+    const [isDisabled, setDisabled] = useState<boolean>(disabled)
 
     useEffect(() => void setupMediaRecorder(), [])
+    useEffect(() => setDisabled(disabled || !mediaRecorder), [disabled, mediaRecorder])
 
     async function setupMediaRecorder(): Promise<void> {
         try {
@@ -56,28 +59,50 @@ export const AudioRecorder: FC<AudioRecorderProps> = ({ onChange, disabled, clas
         }
     }
 
-    function toggleRecording(): boolean {
+    function record(): void {
         if (!mediaRecorder) {
             console.error("MediaRecorder not set")
-            return false
+            return
         }
 
-        if (!recording) {
-            mediaRecorder.start()
-            setRecording(true)
-            return true
+        mediaRecorder.start()
+        setIsRecording(true)
+    }
+
+    function stopRecording(): void {
+        if (!mediaRecorder) {
+            console.error("MediaRecorder not set")
+            return
         }
+
         mediaRecorder.stop()
-        setRecording(false)
-        return false
+        setIsRecording(false)
     }
 
     return (
-        <AudioButton
-            onClick={toggleRecording}
-            disabled={disabled}
-            pulse={recording}
-            className={className}
-        />
+        <button
+            onClick={isRecording ? stopRecording : record}
+            disabled={isDisabled}
+            className={
+                cn(
+                    "p-2 rounded text-gray-700 focus:outline-none hover:bg-gray-200",
+                    isDisabled
+                        ? "opacity-50 cursor-not-allowed"
+                        : isRecording
+                            ? "text-red-600"
+                            : "text-blue-600",
+                    className
+                )}
+            title={isRecording ? "Stop" : "Read"}
+        >
+            {
+                isDisabled
+                    ? <MicOff className="h-6 w-6 opacity-50" /> // Disabled
+                    : isRecording
+                        ? <Mic className="h-6 w-6" /> // Reading
+                        : <Mic className="h-6 w-6" /> // Idle
+            }
+        </button >
     )
 }
+
