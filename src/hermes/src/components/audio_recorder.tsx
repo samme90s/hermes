@@ -3,12 +3,11 @@ import { AudioButton } from "./audio_button"
 
 interface AudioRecorderProps {
     onChange: (audioBlob: Blob) => void
-    onError: (error: string) => void
     disabled?: boolean
     className?: string
 }
 
-export const AudioRecorder: FC<AudioRecorderProps> = ({ onChange, onError, disabled, className }) => {
+export const AudioRecorder: FC<AudioRecorderProps> = ({ onChange, disabled, className }) => {
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
     const [recording, setRecording] = useState<boolean>(false)
 
@@ -17,13 +16,13 @@ export const AudioRecorder: FC<AudioRecorderProps> = ({ onChange, onError, disab
     async function setupMediaRecorder(): Promise<void> {
         try {
             if (!navigator?.mediaDevices) {
-                onError("MediaDevices not supported")
+                console.error("MediaDevices not supported")
                 return
             }
 
             const mime = "audio/webm;codecs=opus"
             if (!MediaRecorder.isTypeSupported(mime)) {
-                onError(`Mime: ${mime} is not supported`)
+                console.error(`Mime: ${mime} is not supported`)
                 return
             }
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -52,22 +51,20 @@ export const AudioRecorder: FC<AudioRecorderProps> = ({ onChange, onError, disab
             }
 
             setMediaRecorder(mediaRecorder)
-            onError("")
         } catch (err) {
-            onError(`Recording error: ${err}`)
+            console.error(`Recording error: ${err}`)
         }
     }
 
     function toggleRecording(): boolean {
         if (!mediaRecorder) {
-            onError("MediaRecorder not set")
+            console.error("MediaRecorder not set")
             return false
         }
 
         if (!recording) {
             mediaRecorder.start()
             setRecording(true)
-            onError("")
             return true
         }
         mediaRecorder.stop()

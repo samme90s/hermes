@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from "react"
+import { FC, useRef, useState } from "react"
 import { useMutation } from "@tanstack/react-query"
 import { Loading, Hex } from "./components/loading"
 import { DialogBox } from "./components/dialog_box"
@@ -7,6 +7,7 @@ import { ChatBox } from "./components/chat_box"
 import { AudioRecorder } from "./components/audio_recorder"
 import { ToggleInput } from "./components/toggle_input"
 import { chat, ChatResponse } from "./services/gateway"
+import { TextToSpeech } from "./components/text_to_speech"
 
 interface DialogItem {
     text: string
@@ -16,22 +17,18 @@ interface DialogItem {
 export const App: FC = () => {
     const [isAudioMode, setIsAudioMode] = useState<boolean>(false)
     const [prompt, setPrompt] = useState<string>("")
-    const [promptLoading, setPromptLoading] = useState<boolean>(false)
     const [dialogs, setDialogs] = useState<DialogItem[]>([])
 
     const containerRef = useRef<HTMLDivElement>(null)
 
     const toggleMode = (): void => setIsAudioMode(prev => !prev)
 
-    const handlePrompt = async (): Promise<void> => {
+    const handleCBSubmit = async (): Promise<void> => {
         if (!prompt.trim()) return
-        setPromptLoading(true)
 
         const newDialog: DialogItem = { text: prompt, label: "Me" }
         setDialogs(prev => [...prev, newDialog])
         setPrompt("")
-
-        setPromptLoading(false)
 
         // Trigger the answer mutation
         answerMutation.mutate(prompt)
@@ -50,13 +47,6 @@ export const App: FC = () => {
         }
     )
 
-    // TODO: Fix scrolling when mutation is pending and resolves
-    useEffect(() => {
-        if (containerRef.current) {
-            containerRef.current.scrollTop = containerRef.current.scrollHeight
-        }
-    }, [isAudioMode, prompt, promptLoading, dialogs])
-
     return (
         <div className="max-w-lg h-screen p-4 mx-auto flex flex-col space-y-2">
             <Box
@@ -66,15 +56,18 @@ export const App: FC = () => {
                 {dialogs.map((dialog, index) => (
                     <DialogBox key={index} text={dialog.text} label={dialog.label} />
                 ))}
-                {(promptLoading || answerMutation.isPending) && <Loading color={Hex.BLUE} />}
+                {answerMutation.isPending && <Loading color={Hex.BLUE} />}
 
                 {/* Input area */}
-                <div className="mt-auto relative">
-                    {isAudioMode
-                        ? <AudioRecorder onChange={() => null} onError={() => null} className="h-16 w-full" />
-                        : <ChatBox value={prompt} onChange={setPrompt} onSubmit={handlePrompt} />
-                    }
-                    <ToggleInput onSwitch={toggleMode} toggled={isAudioMode} className="absolute right-1 bottom-1" />
+                <div className="mt-auto space-y-2">
+                    <div className="flex items-center gap-2">
+                        {isAudioMode
+                            ? <AudioRecorder disabled onChange={() => null} className="flex-grow" />
+                            : <ChatBox value={prompt} onChange={setPrompt} onSubmit={handleCBSubmit} className="flex-grow" />
+                        }
+                        <ToggleInput onSwitch={toggleMode} toggled={isAudioMode} />
+                    </div>
+                    <TextToSpeech text={dialogs.at(-1)?.text || ""} />
                 </div>
             </Box>
         </div >
