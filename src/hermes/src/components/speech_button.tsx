@@ -15,12 +15,12 @@ export const SpeechButton: FC<SpeechButtonProps> = ({ onClick, disabled, isSpeak
             onClick={onClick}
             disabled={disabled}
             className={cn(
-                "p-2 rounded text-white focus:outline-none",
+                "p-2 rounded text-gray-700 focus:outline-none hover:bg-gray-200",
                 disabled
-                    ? "opacity-50 cursor-not-allowed bg-gray-400"
+                    ? "opacity-50 cursor-not-allowed"
                     : isSpeaking
-                        ? "bg-red-500 hover:bg-red-600"
-                        : "bg-blue-500 hover:bg-blue-600",
+                        ? "text-red-600"
+                        : "text-blue-600",
                 className
             )}
             title={isSpeaking ? "Stop" : "Read"}

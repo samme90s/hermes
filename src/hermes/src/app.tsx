@@ -8,6 +8,7 @@ import { AudioRecorder } from "./components/audio_recorder"
 import { ToggleInput } from "./components/toggle_input"
 import { chat, ChatResponse } from "./services/gateway"
 import { TextToSpeech } from "./components/text_to_speech"
+import { VoiceSelector } from "./components/voice_selector"
 
 interface DialogItem {
     text: string
@@ -18,6 +19,7 @@ export const App: FC = () => {
     const [isAudioMode, setIsAudioMode] = useState<boolean>(false)
     const [prompt, setPrompt] = useState<string>("")
     const [dialogs, setDialogs] = useState<DialogItem[]>([])
+    const [voice, setVoice] = useState<SpeechSynthesisVoice | undefined>(undefined)
 
     const containerRef = useRef<HTMLDivElement>(null)
 
@@ -54,7 +56,9 @@ export const App: FC = () => {
                 className="max-h-screen flex-1 flex flex-col gap-y-2 overflow-y-auto"
             >
                 {dialogs.map((dialog, index) => (
-                    <DialogBox key={index} text={dialog.text} label={dialog.label} />
+                    <TextToSpeech key={index} text={dialog.text} voice={voice}>
+                        <DialogBox text={dialog.text} label={dialog.label} />
+                    </TextToSpeech>
                 ))}
                 {answerMutation.isPending && <Loading color={Hex.BLUE} />}
 
@@ -67,7 +71,7 @@ export const App: FC = () => {
                         }
                         <ToggleInput onSwitch={toggleMode} toggled={isAudioMode} />
                     </div>
-                    <TextToSpeech text={dialogs.at(-1)?.text || ""} />
+                    <VoiceSelector onChange={setVoice} />
                 </div>
             </Box>
         </div >

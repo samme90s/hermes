@@ -2,7 +2,6 @@ import { FC } from "react"
 import { useQuery } from "@tanstack/react-query"
 
 interface VoiceSelectorProps {
-    selectedVoice: SpeechSynthesisVoice | null
     onChange: (voice: SpeechSynthesisVoice) => void
     className?: string
 }
@@ -27,7 +26,7 @@ const fetchVoices = (): Promise<SpeechSynthesisVoice[]> => {
     })
 }
 
-export const VoiceSelector: FC<VoiceSelectorProps> = ({ selectedVoice, onChange, className }) => {
+export const VoiceSelector: FC<VoiceSelectorProps> = ({ onChange, className }) => {
     const { data: voices = [], isLoading } = useQuery({
         queryKey: ["voices"],
         queryFn: fetchVoices
@@ -40,21 +39,16 @@ export const VoiceSelector: FC<VoiceSelectorProps> = ({ selectedVoice, onChange,
 
     return (
         <div className={className}>
-            {isLoading ? (
-                <span className="text-gray-500">Loading voices...</span>
-            ) : (
-                <select
-                    value={selectedVoice?.name || ""}
-                    onChange={handleChange}
-                    className="w-full p-2 rounded border border-gray-300"
-                >
+            {isLoading
+                ? <span className="text-gray-500">Loading voices...</span>
+                : <select onChange={handleChange} className="w-full p-2 rounded border border-gray-300">
                     {voices.map((voice) => (
                         <option key={voice.name} value={voice.name}>
                             {voice.name} ({voice.lang})
                         </option>
                     ))}
                 </select>
-            )}
+            }
         </div>
     )
 }

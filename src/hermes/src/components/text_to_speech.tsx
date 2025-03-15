@@ -1,17 +1,17 @@
-import { FC, useState } from "react"
-import { VoiceSelector } from "./voice_selector"
+import { FC, ReactNode, useState, useRef } from "react"
 import { SpeechButton } from "./speech_button"
 
 interface TextToSpeechProps {
     text: string
+    voice?: SpeechSynthesisVoice
+    children?: ReactNode
 }
 
-export const TextToSpeech: FC<TextToSpeechProps> = ({ text }) => {
-    const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null)
+export const TextToSpeech: FC<TextToSpeechProps> = ({ text, voice, children }) => {
     const [isSpeaking, setIsSpeaking] = useState(false)
+    const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
 
-    // Disable the button if there is no text, speech synthesis is not supported,
-    // or it is currently speaking.
+    // Disable the button if there is no text, speech synthesis is not supported.
     const disabled = !text.trim() || !window.speechSynthesis
 
     // Function to clean up Markdown for speech synthesis while keeping structure
@@ -26,30 +26,27 @@ export const TextToSpeech: FC<TextToSpeechProps> = ({ text }) => {
             .trim()
     }
 
-    function handleSpeech(): void {
+    const speak = () => {
         if (!window.speechSynthesis) {
-            console.error("SpeechSynthesis not supported")
+            console.error("SpeechSynthesis is not supported")
             return
         }
 
-        if (isSpeaking) {
+        if (utteranceRef.current) {
             window.speechSynthesis.cancel()
-            setIsSpeaking(false)
+        }
+
+        if (!text.trim()) {
             return
         }
 
-        const cleanText = sanitizeText(text)
+        const sanitizedText = sanitizeText(text)
 
-        if (cleanText.length === 0) {
-            console.error("No valid text to speak")
-            return
+        const utterance = new SpeechSynthesisUtterance(sanitizedText)
+        if (voice) {
+            utterance.voice = voice
         }
-
-        const utterance = new SpeechSynthesisUtterance(cleanText)
-
-        if (selectedVoice) {
-            utterance.voice = selectedVoice
-        }
+        utteranceRef.current = utterance
 
         utterance.onstart = () => setIsSpeaking(true)
         utterance.onend = () => setIsSpeaking(false)
@@ -58,21 +55,21 @@ export const TextToSpeech: FC<TextToSpeechProps> = ({ text }) => {
         window.speechSynthesis.speak(utterance)
     }
 
+    const stopSpeaking = () => {
+        if (utteranceRef.current) {
+            window.speechSynthesis.cancel()
+            setIsSpeaking(false)
+        }
+    }
+
     return (
-        <div className="flex items-center gap-2">
-            {/* Voice Selector with Flex Grow */}
-            <VoiceSelector
-                selectedVoice={selectedVoice}
-                onChange={setSelectedVoice}
-                className="flex-grow"
-            />
-            {/* Speech Button with Fixed Size */}
+        <div className="w-full">
+            <div>{children}</div>
             <SpeechButton
-                onClick={handleSpeech}
+                onClick={isSpeaking ? stopSpeaking : speak}
                 isSpeaking={isSpeaking}
                 disabled={disabled}
             />
         </div>
     )
 }
-
