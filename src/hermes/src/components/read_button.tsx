@@ -65,25 +65,20 @@ export const ReadButton: FC<ReadButtonProps> = ({ text, disabled, className }) =
         <button
             onClick={isReading ? stopReading : read}
             disabled={isDisabled}
-            className={
-                cn(
-                    "p-2 rounded text-gray-700 focus:outline-none hover:bg-gray-200",
-                    isDisabled
-                        ? "opacity-50 cursor-not-allowed"
-                        : isReading
-                            ? "text-red-600"
-                            : "text-blue-600",
-                    className
-                )}
+            className={cn(
+                "p-2 rounded text-gray-700 focus:outline-none hover:bg-gray-200",
+                isDisabled ? "opacity-50 cursor-not-allowed" : isReading ? "text-red-600" : "text-blue-600",
+                className,
+            )}
             title={isReading ? "Stop" : "Read"}
         >
-            {
-                isDisabled
-                    ? <VolumeX className="h-6 w-6 opacity-50" /> // Disabled
-                    : isReading
-                        ? <Square className="h-6 w-6" /> // Reading
-                        : <Volume2 className="h-6 w-6" /> // Idle
-            }
-        </button >
+            {isDisabled ? (
+                <VolumeX className="h-6 w-6 opacity-50" /> // Disabled
+            ) : isReading ? (
+                <Square className="h-6 w-6" /> // Reading
+            ) : (
+                <Volume2 className="h-6 w-6" /> // Idle
+            )}
+        </button>
     )
 }

@@ -17,19 +17,15 @@ export const App: FC = () => {
         answerMutation.mutate(message)
     }, [])
 
-    const answerMutation = useMutation<ChatResponse, Error, string>(
-        {
-            mutationFn: (prompt) => chat(prompt),
-            onSuccess: (data) => setCurrentText(data.message),
-            onError: (error) => console.error(error)
-        }
-    )
+    const answerMutation = useMutation<ChatResponse, Error, string>({
+        mutationFn: (prompt) => chat(prompt),
+        onSuccess: (data) => setCurrentText(data.message),
+        onError: (error) => console.error(error),
+    })
 
     return (
         <div className="max-w-xl mx-auto p-2 space-y-2">
-            <Box
-                className="overflow-y-auto"
-            >
+            <Box className="overflow-y-auto">
                 <div>
                     <DialogBox text={currentText} label={currentLabel} />
                     {answerMutation.isPending && <Loading color={Hex.BLUE} />}
@@ -39,6 +35,6 @@ export const App: FC = () => {
                     </div>
                 </div>
             </Box>
-        </div >
+        </div>
     )
 }

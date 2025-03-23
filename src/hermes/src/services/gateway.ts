@@ -6,7 +6,7 @@ export const chat = async (message: string): Promise<ChatResponse> => {
     const response = await fetch("http://localhost:8000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: message })
+        body: JSON.stringify({ content: message }),
     })
     if (!response.ok) {
         if (response.headers.get("Content-Type")?.includes("application/json")) {

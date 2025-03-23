@@ -42,10 +42,10 @@ export const RecordButton: FC<RecordButtonProps> = ({ onChange, disabled = false
                     const audioBlob = new Blob(audioChunks, { type: mime })
                     onChange(audioBlob)
                 }
-                audioChunks = []  // Clear chunks for the next session
+                audioChunks = [] // Clear chunks for the next session
             }
 
-            mediaRecorderRef.current = mediaRecorder  // Store in ref
+            mediaRecorderRef.current = mediaRecorder // Store in ref
             setDisabled(disabled || !mediaRecorder)
         } catch (err) {
             console.error(`Recording error: ${err}`)
@@ -76,25 +76,20 @@ export const RecordButton: FC<RecordButtonProps> = ({ onChange, disabled = false
         <button
             onClick={isRecording ? stopRecording : record}
             disabled={isDisabled}
-            className={
-                cn(
-                    "p-2 rounded text-gray-700 focus:outline-none hover:bg-gray-200",
-                    isDisabled
-                        ? "opacity-50 cursor-not-allowed"
-                        : isRecording
-                            ? "text-red-600"
-                            : "text-blue-600",
-                    className
-                )}
+            className={cn(
+                "p-2 rounded text-gray-700 focus:outline-none hover:bg-gray-200",
+                isDisabled ? "opacity-50 cursor-not-allowed" : isRecording ? "text-red-600" : "text-blue-600",
+                className,
+            )}
             title={isRecording ? "Stop" : "Record"}
         >
-            {
-                isDisabled
-                    ? <MicOff className="h-6 w-6 opacity-50" />  // Disabled
-                    : isRecording
-                        ? <Mic className="h-6 w-6" />  // Recording
-                        : <Mic className="h-6 w-6" />  // Idle
-            }
+            {isDisabled ? (
+                <MicOff className="h-6 w-6 opacity-50" /> // Disabled
+            ) : isRecording ? (
+                <Mic className="h-6 w-6" /> // Recording
+            ) : (
+                <Mic className="h-6 w-6" /> // Idle
+            )}
         </button>
     )
 }

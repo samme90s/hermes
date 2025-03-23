@@ -16,7 +16,7 @@ export const Box = forwardRef<HTMLDivElement, BoxProps>(({ children, className }
                 "bg-neutral-100",
                 "box-border border-neutral-300 border rounded-lg",
                 "overflow-y-auto",
-                className
+                className,
             )}
         >
             {children}
