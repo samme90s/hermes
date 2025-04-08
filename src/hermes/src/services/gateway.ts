@@ -3,7 +3,7 @@ export interface ChatResponse {
 }
 
 export const chat = async (message: string): Promise<ChatResponse> => {
-    const response = await fetch("http://localhost:8000/api/chat", {
+    const response = await fetch("http://localhost/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: message }),

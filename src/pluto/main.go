@@ -95,7 +95,7 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Create a structured response
 	response := SimpleChatResponse{
-		Message: "hello world ... " + simpleReq.Content,
+		Message: "Request: " + simpleReq.Content + " -- Response: Hello from the api gateway!",
 	}
 	// Mock response to the client.
 	w.Header().Set("Content-Type", "application/json")

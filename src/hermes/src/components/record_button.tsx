@@ -13,19 +13,29 @@ export const RecordButton: FC<RecordButtonProps> = ({ onChange, disabled = false
     const [isRecording, setIsRecording] = useState(false)
     const [isDisabled, setDisabled] = useState(disabled)
 
-    useEffect(() => void setupMediaRecorder(), [])
-    useEffect(() => setDisabled(disabled || !mediaRecorderRef.current), [disabled])
+    useEffect(() => {
+        setupMediaRecorder() // Consider adding cleanup for the stream/recorder on unmount
+        // Example cleanup (might need refinement based on full app structure):
+        return () => mediaRecorderRef.current?.stream.getTracks().forEach((track) => track.stop())
+    }, []) // Run setup once
+
+    useEffect(() => {
+        // Update disabled state based on prop or if recorder setup failed/pending
+        setDisabled(disabled || !mediaRecorderRef.current)
+    }, [disabled]) // Also re-run if mediaRecorderRef.current changes (though it's set only once)
 
     async function setupMediaRecorder(): Promise<void> {
         try {
             if (!navigator?.mediaDevices) {
                 console.error("MediaDevices not supported")
+                setDisabled(true) // Ensure button is disabled if setup fails early
                 return
             }
 
-            const mime = "audio/webm;codecs=opus"
+            const mime = "audio/webm;codecs=opus" // Consider adding fallback mime types
             if (!MediaRecorder.isTypeSupported(mime)) {
                 console.error(`Mime: ${mime} is not supported`)
+                setDisabled(true)
                 return
             }
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -40,36 +50,41 @@ export const RecordButton: FC<RecordButtonProps> = ({ onChange, disabled = false
             mediaRecorder.onstop = () => {
                 if (audioChunks.length > 0) {
                     const audioBlob = new Blob(audioChunks, { type: mime })
-                    onChange(audioBlob)
+                    onChange(audioBlob) // Send the complete blob
                 }
-                audioChunks = [] // Clear chunks for the next session
+                audioChunks = [] // Clear chunks for the next recording
+                setIsRecording(false) // Ensure state is updated on stop
+            }
+            // Handle potential errors during recording
+            mediaRecorder.onerror = (event) => {
+                console.error("MediaRecorder error:", event)
+                setIsRecording(false)
+                // Optionally update UI or notify user
             }
 
-            mediaRecorderRef.current = mediaRecorder // Store in ref
-            setDisabled(disabled || !mediaRecorder)
+            mediaRecorderRef.current = mediaRecorder // Store the instance
+            setDisabled(disabled) // Set disabled based on the initial prop now that recorder exists
         } catch (err) {
-            console.error(`Recording error: ${err}`)
+            console.error(`Error setting up MediaRecorder: ${err}`)
+            setDisabled(true) // Disable button if setup fails
         }
     }
 
     function record(): void {
-        if (!mediaRecorderRef.current) {
-            console.error("MediaRecorder not set")
+        if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== "inactive") {
+            console.warn("Cannot start recording, recorder not ready or already recording.")
             return
         }
-
         mediaRecorderRef.current.start()
         setIsRecording(true)
     }
 
     function stopRecording(): void {
-        if (!mediaRecorderRef.current) {
-            console.error("MediaRecorder not set")
+        if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== "recording") {
+            console.warn("Cannot stop recording, recorder not ready or not recording.")
             return
         }
-
         mediaRecorderRef.current.stop()
-        setIsRecording(false)
     }
 
     return (
@@ -77,18 +92,32 @@ export const RecordButton: FC<RecordButtonProps> = ({ onChange, disabled = false
             onClick={isRecording ? stopRecording : record}
             disabled={isDisabled}
             className={cn(
-                "p-2 rounded text-gray-700 focus:outline-none hover:bg-gray-200",
-                isDisabled ? "opacity-50 cursor-not-allowed" : isRecording ? "text-red-600" : "text-blue-600",
+                // Base styles
+                "p-2 rounded focus:outline-none",
+                // Add flex properties to control internal layout
+                "flex items-center justify-center",
+                // Hover/Focus states
+                "hover:bg-gray-200", // Apply hover effect only when not disabled
+                // Disabled state
+                isDisabled
+                    ? "opacity-50 cursor-not-allowed text-gray-700" // Base color, faded
+                    : // Active/Idle states (only apply color if not disabled)
+                      isRecording
+                      ? "text-red-600" // Recording color
+                      : "text-blue-600", // Idle color
+                // Merge external classes (where h-10 etc. is applied)
                 className,
             )}
-            title={isRecording ? "Stop" : "Record"}
+            title={isRecording ? "Stop Recording" : "Start Recording"}
         >
+            {/* Conditionally render icons */}
             {isDisabled ? (
-                <MicOff className="h-6 w-6 opacity-50" /> // Disabled
+                // Use h-full to scale icon with button height, w-auto for aspect ratio
+                <MicOff className="h-full w-auto opacity-50" />
             ) : isRecording ? (
-                <Mic className="h-6 w-6" /> // Recording
+                <Mic className="h-full w-auto" /> // Recording state icon
             ) : (
-                <Mic className="h-6 w-6" /> // Idle
+                <Mic className="h-full w-auto" /> // Idle state icon
             )}
         </button>
     )
