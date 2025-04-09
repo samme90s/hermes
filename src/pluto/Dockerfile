@@ -21,7 +21,7 @@ RUN go mod download
 COPY *.go ./
 
 # Build the Go application
-RUN go build -o main ./
+RUN go build -o run ./
 
 # FINAL STAGE
 # #######################
@@ -32,10 +32,10 @@ FROM alpine:${ALPINE_BASE}
 WORKDIR /root/
 
 # Copy the binary from the builder stage to this stage
-COPY --from=builder /app/main ./
+COPY --from=builder /app/run ./
 
 # Expose the application
 EXPOSE ${PORT}
 
 # Default command to run the executable
-CMD ["./main"]
+CMD ["./run"]
