@@ -9,16 +9,16 @@ services:
     ports:
       - "80:80"
 
-  pluto:
-    container_name: pluto
+  hecate:
+    container_name: hecate
     build:
-      context: ./src/pluto/
+      context: ./src/hecate/
       dockerfile: Dockerfile
     networks:
       - net
     env_file:
-      - ./src/pluto/.env
-    # No ports mapping here—pluto is available only within the Docker network.
+      - ./src/hecate/.env
+    # No ports mapping here - hecate is available only within the Docker network.
 
 networks:
   net:

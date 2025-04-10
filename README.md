@@ -12,7 +12,7 @@ efficient, low-latency speech-to-text processing.
 .
 |- src
    |- hermes (frontend)
-   |- pluto  (gateway)
+   |- hecate (gateway)
 ```
 
 ## Development
@@ -29,12 +29,12 @@ before running the project.
 
 ```shell
 # Run the server
-cd src/pluto/ && go run main.go
+cd src/hecate/ && go run main.go
 ```
 
 ```shell
 # Build the server
-cd src/pluto/ && go build
+cd src/hecate/ && go build
 ```
 
 ### Bun

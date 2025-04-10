@@ -1,4 +1,4 @@
-module pluto
+module hecate
 
 go 1.24.1
 
