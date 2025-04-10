@@ -6,6 +6,16 @@ messenger of the Greek gods, this project is designed to bridge the gap between
 voice input and digital interaction. It provides a robust client integration for
 efficient, low-latency speech-to-text processing.
 
+Hecate was a multifaceted Greek goddess strongly associated with magic,
+the night, the moon, ghosts, and different realms often linked to the
+unseen and the boundaries between worlds. Due to these connections and her
+perceived ability to move between realms, she also became seen as a guardian
+of liminal spaces. This is perhaps her most defining characteristic.
+She was believed to watch over crossroads, doorways, gates, and thresholds
+– places of transition and decision.
+Statues of her (often three-formed, facing different directions) were placed
+at intersections and city gates.
+
 > [!NOTE]
 > This project only serves as a proof of concept and has not been finished.
 > It is not intended for production use and should not be used as such.
