@@ -21,6 +21,7 @@ COPY package.json .
 RUN bun install
 
 # Copies the rest of the application code to the app directory.
+COPY public/ public/
 COPY src/ src/
 COPY index.html .
 COPY tsconfig.json .

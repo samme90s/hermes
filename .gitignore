@@ -3,8 +3,6 @@ logs/
 
 # Client
 node_modules/
-vite/
-dist/
 
 # Environment
 .env
@@ -13,3 +11,6 @@ dist/
 run
 *.out
 *.exe
+vite/
+dist/
+*.tsbuildinfo
