@@ -6,6 +6,14 @@ messenger of the Greek gods, this project is designed to bridge the gap between
 voice input and digital interaction. It provides a robust client integration for
 efficient, low-latency speech-to-text processing.
 
+> [!NOTE]
+> This project only serves as a proof of concept and has not been finished.
+> It is not intended for production use and should not be used as such.
+> Over the course of the project multiple technologies have been used and
+> interchanged, resulting this repository more closely representing the steps
+> taken to learn the intricate subject of automatic speech recognition and
+> working with large language models.
+
 ## Tree
 
 ```shell
